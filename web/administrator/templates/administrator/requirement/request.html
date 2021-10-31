@@ -1,0 +1,39 @@
+<!-- 학생들 현재 보유 포인트, 지금까지 사용한 포인트 확인 -->
+{% extends 'administrator/observation/student.html' %}
+{% load static %}
+
+{% block title %}
+    <title>요구사항 페이지</title>
+    <link rel="stylesheet" href="{% static 'requirement/request.css' %}" />
+{% endblock title %}
+
+{% block script %}
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
+    <!-- <script type="text/javascript" src="point.js"> </script>   -->
+{% endblock script %}   
+
+
+{% block subject %}
+    <h1>학급 내 요구 사항</h1>
+{% endblock subject %}
+    
+
+{% block top %}
+    <img id="topImg" src="{%static 'requirement/requirement_img/list.png' %}"/>
+{% endblock top %}
+   
+{% block table %}
+    <th >이름</th>
+    <th >요구사항</th>
+{% endblock table %}
+
+
+{% block data %}
+{% for object in object_list %} 
+    <tr>
+        <td>{{ object.student.name }}</td>
+        <td>{{ object.content }}</td>
+    </tr>
+{% endfor %}
+{% endblock data %}
+   
