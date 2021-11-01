@@ -35,8 +35,26 @@ class LogDetailView(DetailView):
         self.object.feedback = feedback
         self.object.check = 'O'
         self.object.save()
+
+        send_feed = self.object.feedback
         
         #피드백 보내기
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/feedback"
+
+        payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + send_feed + '\"\n    }\n}'
+        print('####')
+        print(payload)
+
+        headers = {
+        'Accept': 'application/json',
+        'X-M2M-RI': '12345',
+        'X-M2M-Origin': '{{aei}}',
+        'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+
+        print(response.text)
         return redirect('administrator:observation')
 
 
@@ -44,6 +62,18 @@ class PointView(ListView):
     #포인트 항목 [O]
     template_name = 'administrator/point/point_list.html'
     model = Point
+
+
+
+def get_context(context):
+    context['item1'] = Item.objects.filter(name='item1')
+    context['item2'] = Item.objects.filter(name='item2')
+    context['item3'] = Item.objects.filter(name='item3')
+    
+    context['item1_price'] = context['item1'][0].price
+    context['item2_price'] = context['item2'][0].price
+    context['item3_price'] = context['item3'][0].price
+    return context
 
 
 class PurchaseView(ListView):
@@ -54,9 +84,7 @@ class PurchaseView(ListView):
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
-        context['item1'] = Item.objects.filter(name='item1')
-        context['item2'] = Item.objects.filter(name='item2')
-        context['item3'] = Item.objects.filter(name='item3')
+        context = get_context(context)
         return self.render_to_response(context) 
         
 
@@ -71,12 +99,6 @@ class StudentLogView(ListView):
     model = Student
 
 
-items = {
-    'item1': Item.objects.filter(name='item1'),
-    'item2': Item.objects.filter(name='item2'),
-    'item3': Item.objects.filter(name='item3')
-}
-
 class ItemUpdateView(DetailView):
     #상품 관리
     template_name = 'administrator/item/item.html'
@@ -86,15 +108,8 @@ class ItemUpdateView(DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
        
-        context = self.get_context_data()  
-        context['item1'] = Item.objects.filter(name='item1')
-        context['item2'] = Item.objects.filter(name='item2')
-        context['item3'] = Item.objects.filter(name='item3')
-        ####
-        context['item1_price'] = Item.objects.filter(name='item1')[0].price
-        context['item2_price'] = Item.objects.filter(name='item2')[0].price
-        context['item3_price'] = Item.objects.filter(name='item3')[0].price
-
+        context = self.get_context_data() 
+        context = get_context(context) 
         return self.render_to_response(context) 
 
     def post(self, request, *args, **kwargs):
@@ -138,7 +153,6 @@ class ItemUpdateView(DetailView):
                         )
                 elif new < old:
                     for i in range(old - new ):
-                        print('#########')
                         last_obj = update_list[num]['item'].last()
                         last_obj.delete()
                         

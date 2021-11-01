@@ -4,12 +4,12 @@
 
 {% block title %}
     <title>상품 관리 페이지</title>
-    <link rel="stylesheet" href="{% static 'item/item.css' %}" />
+    <link rel="stylesheet" href="{% static 'All.css' %}" />
 {% endblock title %}
 
 {% block script %}
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
-    <script type="text/javascript" src="point.js"> </script>  
+    <!-- <script type="text/javascript" src="point.js"> </script>   -->
 {% endblock script %} 
 
 {% block subject %}
@@ -36,34 +36,34 @@
         <td>자동 물 주기</td>
         <td>
             현재 : {{item1_price}}<br>
-            수정 : <input type="text" size='1' name='item1_price'>
+            수정 <input type="text" size='1' name='item1_price' style="margin:5px;">
         </td>
         <td>
             현재 : 3 / {{ item1.count }}<br>
-            수정 : <input type="text" size='1' name='item1_count'>
+            수정 <input type="text" size='1' name='item1_count'>
         </td>
         <td rowspan='3'><input type="submit" role="button" value="수정"></td>
     </tr>
     <tr>
-        <td>자동 환기</td>
+        <td>자동 환기모터 작동</td>
         <td>
             현재 : {{item2_price}}<br>
-            수정 : <input type="text" size='1' name='item2_price'>
+            수정 <input type="text" size='1' name='item2_price'>
         </td>
         <td>
             현재 : 3 / {{ item2.count }}<br>
-            수정 : <input type="text" size='1' name='item2_count'>
+            수정 <input type="text" size='1' name='item2_count'>
         </td>
     </tr>
     <tr>
-        <td>뭐더라</td>
+        <td>자동 무드등 작동</td>
         <td>
             현재 :{{item3_price}}<br>
-            수정 : <input type="text" size='1' name='item3_price'>
+            수정 <input type="text" size='1' name='item3_price'>
         </td>
         <td>
             현재 : 3 / {{ item3.count }}<br>
-            수정 : <input type="text" size='1' name='item3_count'>
+            수정 <input type="text" size='1' name='item3_count'>
         </td>
     </tr>
 </form>

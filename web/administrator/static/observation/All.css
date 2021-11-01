@@ -1,0 +1,207 @@
+/* 공통 */
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgb(255, 255, 255);
+    overflow:hidden;
+}
+
+header{
+    position: fixed !important;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    height:50px;
+    left:0px;
+    top:-13px;
+    background-color: rgb(6, 68, 32);
+    position: relative;
+}
+
+/* 제목 */
+h1{
+    position:relative;
+    font-size:40px;
+    color: rgb(0, 0, 0);
+    font-weight:500;
+    top:70px;
+    left:100px; 
+    margin-left: auto; 
+    margin-right: auto;
+    width:500px;
+    border-bottom:3px solid rgb(172, 204, 180);
+    z-index:0;
+
+}
+
+#top{
+    position:relative
+}
+
+/* 제목 옆 이미지 */
+#topImg{ 
+    position:relative;
+    display:block; 
+    margin:auto;
+    width:95px;
+    height:85px;
+    left:-210px;
+    top:-30px;
+    border-bottom:2px;
+    z-index:2;
+}
+
+#img{
+    position:relative;
+    width:200px;
+    height:200px;
+    left:1200px;
+    top:-130px;
+    z-index:2;
+}
+
+/* 테이블 */
+.table{
+    position:relative;
+    width:820px;
+    height:200px;
+    top:0px;  
+    font-size:20px;
+    /* left:45px; */
+    margin-left: auto; 
+    margin-right: auto;
+    text-align:center;
+    border-collapse: collapse;
+    border-top: 3px solid rgb(172, 204, 180);
+}
+
+.table th {
+    color: rgb(38, 57, 65);
+    background: rgb(228, 239, 231);
+    text-align: center;
+  }
+
+.table th, .table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+
+
+.table th:first-child, .table td:first-child {
+    border-left: 0;
+}
+
+.table th:last-child, .table td:last-child {
+    border-right: 0;
+}
+
+.table tr td:first-child{
+    text-align: center;
+}
+  
+.table caption{caption-side: bottom; display: none;
+}
+
+/* --------------------------------------- */
+
+/*식물 이미지 띄워주는 부분*/
+#plant_image{
+    position:relative;
+}
+
+/* 식물 이미지 사이즈 500*500 고정 */
+#P_img{
+    position:relative;
+    display:block; 
+    margin:auto;
+    width:500px;
+    height:500px;
+    /* left:270px; */
+    top:-50px;
+    z-index:2;
+}
+
+/* --------------------------------------- */
+
+/*피드백 입력*/
+#text{
+    position:relative;
+    text-align:center;
+    display:block; 
+    margin:auto;
+    top:-80px;
+    /* left:300px;  */
+    /* 밑은 창 크기 조절 */
+    width:600px;
+    height:600px;
+    font-size:18px;
+}
+
+/*제출 버튼*/
+#sub{
+    position:relative;
+    top:-70px;
+    left:550px; 
+    width:50px;
+    height:30px;
+    font-size:15px;
+}
+
+/*뒤로가기 버튼*/
+#delete{
+    position:relative;
+    top:-100px;
+    left:490px; 
+    width:50px;
+    height:30px;
+    font-size:15px;
+    background-color: black;
+    color:white;
+}
+
+
+
+/* 식물 일지 내용 테이블 */
+.plant_table{
+    position:relative;
+    width: 750px;
+    height:200px;
+    top:-25px;  
+    /* left:230px; */
+    margin-left: auto; 
+    margin-right: auto;
+    text-align:center;
+    border-collapse: collapse;
+    border-top: 3px solid rgb(172, 204, 180);
+}
+
+.plant_table th {
+    color: rgb(38, 57, 65);
+    background: rgb(228, 239, 231);
+    text-align: center;
+  }
+
+.plant_table th, .plant_table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+
+
+.plant_table th:first-child, .plant_table td:first-child {
+    border-left: 0;
+}
+
+.plant_table th:last-child, .plant_table td:last-child {
+    border-right: 0;
+}
+
+.plant_table tr td:first-child{
+    text-align: center;
+}
+  
+.plant_table caption{caption-side: bottom; display: none;
+}
+

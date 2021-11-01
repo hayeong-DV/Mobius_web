@@ -4,7 +4,7 @@
 
 {% block title %}
     <title>상품 구매 현황 페이지</title>
-    <link rel="stylesheet" href="{% static 'purchase/check.css' %}" />
+    <link rel="stylesheet" href="{% static 'All.css' %}" />
 {% endblock title %}
 
 {% block script %}
@@ -31,7 +31,7 @@
 {% block data %}
 <tr>
     <td>자동 물 주기</td>
-    <td>1000</td>
+    <td>{{item1_price}}</td>
     <td>3 / {{item1.count}}</td>
     <td>
         {% for object in item1 %}
@@ -40,8 +40,8 @@
     </td>
 </tr>
 <tr>
-    <td>자동 모터 작동</td>
-    <td>1500</td>
+    <td>자동 환기모터 작동</td>
+    <td>{{item2_price}}</td>
     <td>3 / {{item2.count}}</td>
     <td>
         {% for object in item2 %}
@@ -50,8 +50,8 @@
     </td>
 </tr>
 <tr>
-    <td>뭐더라</td>
-    <td>1500</td>
+    <td>자동 무드등 작동</td>
+    <td>{{item3_price}}</td>
     <td>3 / {{item3.count}}</td>
     <td>
         {% for object in item3 %}
