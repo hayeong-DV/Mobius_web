@@ -5,7 +5,7 @@ body{
     justify-content: center;
     align-items: center;
     background: rgb(255, 255, 255);
-    overflow:hidden;
+    /* overflow-x:hidden; */
 }
 
 header{

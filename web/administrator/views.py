@@ -17,16 +17,66 @@ class HomeView(TemplateView):
 class ObserveLogView(ListView):
     #일지목록 [O]
     template_name = 'administrator/observation/student.html'
-    model = Observe
+    model = Student
 
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        
+        for student in self.object_list:
+            context[student] = student.observe_set.all()
+        
+        return self.render_to_response(context)
+        
+    
 
 class LogDetailView(DetailView):
     #일지세부(학생별) 
     template_name = 'administrator/observation/record.html'
-    model = Observe
+    model = Student
  
     # def get_success_url(self):
     #     return reverse_lazy('administrator:log_detail', kwargs={"pk":self.kwargs['pk']})
+
+    def get(self, request, *args, **kwargs):
+        #pk로 특정 학생 로드
+        self.object = self.get_object()
+        context = self.get_context_data() 
+        print('####')
+        print(self.object.name)
+        
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
+
+        headers = {
+        'Accept': 'application/json',
+        'X-M2M-RI': '12345',
+        'X-M2M-Origin': 'SOrigin'
+        }
+
+        response = requests.request("GET", url, headers=headers)
+        get_data = json.loads(response.text)
+        record = get_data['m2m:cin']['con']
+
+        #임시 이름
+        read_name = self.object.name
+        image = record['image']
+        title = record['title']
+        text = record['intext']
+
+        # Observe.objects.create(
+        #     student = Student.objects.get(name = read_name),
+        #     image = image,
+        #     title = title,
+        #     content = text
+        # )
+        context['object'] = Observe.objects.filter(
+            student = Student.objects.get(name = read_name)
+            )
+
+        print('####')
+        print(context)
+        return self.render_to_response(context)
+
 
     def post(self, request, *args, **kwargs):
         #피드백 (저장,전송) 확인상태 변경
@@ -53,8 +103,10 @@ class LogDetailView(DetailView):
         }
 
         response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
-
+        
+        print('############')
         print(response.text)
+        print('############')
         return redirect('administrator:observation')
 
 
@@ -63,6 +115,13 @@ class PointView(ListView):
     template_name = 'administrator/point/point_list.html'
     model = Point
 
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        #여기 
+        #post request
+        return HttpResponse
+
+        
 
 
 def get_context(context):

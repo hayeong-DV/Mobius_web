@@ -1,5 +1,7 @@
 from django.urls import path
 from administrator import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name='administrator'
 
@@ -30,4 +32,4 @@ urlpatterns=[
     #상품 관리
     path('item-update/<int:pk>', views.ItemUpdateView.as_view(), name='item-update'),
 
-]
+] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

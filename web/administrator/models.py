@@ -19,6 +19,8 @@ class Observe(models.Model):
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=False)
     # check = models.CharField(max_length=20, choices= STATUS)
+    image = models.ImageField(upload_to = 'images/', blank=True, null=True )
+    title = models.CharField(max_length=100, null=False)
     content = models.TextField(null=False)
     feedback = models.TextField(null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)

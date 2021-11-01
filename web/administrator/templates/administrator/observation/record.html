@@ -19,7 +19,7 @@
 {% block top %}
     <img id="topImg" src="{%static 'observation/plant.jpg' %}"/>
 {% endblock top %}
- 
+
 
 
 {% block content %}  
@@ -27,6 +27,7 @@
         <!-- 이미지 js로 연동해서 가져오게! -->
         <!-- <img id="P_img" src="./image/plant.jpg"/> -->
         <img id="P_img" src=""/>
+        {{object.image}}
     </div>
 {% endblock content %}
 
@@ -37,6 +38,7 @@
 
 
 {% block data %}
+
 <tr>
     <td>이름 : {{object.student.name}}</td>
 </tr>
@@ -64,6 +66,3 @@
 
 {% endblock data %}
             
-
-
-           

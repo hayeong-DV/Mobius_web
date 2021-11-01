@@ -34,7 +34,7 @@
             {% endblock top %}
          </div>
     </div> 
-    
+
    {% block content %}
    {% endblock content %}
    <table class="table">
@@ -42,21 +42,25 @@
              <tr>
                 {% block table %}
                 <th >이름</th>
-                <th >일지 기록 날짜</th>
+                <th >최근 기록 날짜</th>
                 <th >선생님 확인</th>
                 {% endblock table %}
             </tr>
             {% block data %}
-            {% for object in object_list %} 
+            {% for object in object_list %}
+            {% if object.name == 'teacher' %} 
+
+            {% else %}
             <tr>
-                <td><a href ="{% url 'administrator:log_detail' object.id %}" >{{ object.student.name }}</a></td>
-                <td>{{ object.created_date|date:"Y-m-d  [H:i]" }}</td>
-                {% if object.feedback %}
+                <td><a href ="{% url 'administrator:log_detail' object.id %}" >{{ object.name }}</a></td>
+                <td>{{ object.observe_set.last.created_date|date:"Y-m-d  [H:i]" }}</td>
+                {% if object.observe_set.last.feedback %}
                 <td>O</td>
                 {% else %} 
                 <td>X</td>
                 {% endif %}
             </tr>
+            {% endif %}
             {% endfor %}
             {% endblock data %}
             <tbody id="myTable"> </tbody>
