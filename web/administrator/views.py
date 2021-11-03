@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect
 from administrator.models import *
 import requests
 import json
+import base64
+from django.core.files.base import ContentFile
 # Create your views here.
 class HomeView(TemplateView):
     #메인화면- (일지목록, 포인트 항목, 장터) [O]
@@ -20,12 +22,55 @@ class ObserveLogView(ListView):
     model = Student
 
     def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
+        self.object = self.get_queryset()
+        self.object_list = self.object
+        
+        #ㅅ학생수 만큼 cin가져오기
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
+
+        headers = {
+        'Accept': 'application/json',
+        'X-M2M-RI': '12345',
+        'X-M2M-Origin': 'SOrigin'
+        }
+
+        #일지 올릴때 (record)cnt에 모든 애들이 다올리는거지? - O
+        # (record)cnt하나만 쓴다 하면 이름,날짜도 같이 받아오기
+
+        #cin갯수에 따라 response데이터 받는거나중에 추가
+         
+        response = requests.request("GET", url, headers=headers)
+        get_data = json.loads(response.text)
+        record = get_data['m2m:cin']['con']
+
+        read_name = record['id']
+        image = record['image']
+        title = record['title']
+        text = record['intext']
+        date = record['date']
+
         context = self.get_context_data()
-        
-        for student in self.object_list:
-            context[student] = student.observe_set.all()
-        
+       
+        for student in self.object:
+            #각 학생마다 가진 관찰일지 우선 할당
+            context[student.name]= student.observe_set.all()
+            
+            #새로운 관찰일지 생성
+            #같은 날짜가 있다면 생성 x
+            if student.name == read_name:
+                if context[student.name].filter(receive_date = date).exists():
+                    pass
+                else:
+                    Observe.objects.create(
+                        student = Student.objects.get(name = read_name),
+                        image = image,
+                        title = title,
+                        content = text,
+                        receive_date = date
+                    )
+            # print('#############')
+            # print(context)
+            # print('#############')
         return self.render_to_response(context)
         
     
@@ -42,39 +87,11 @@ class LogDetailView(DetailView):
         #pk로 특정 학생 로드
         self.object = self.get_object()
         context = self.get_context_data() 
-        print('####')
-        print(self.object.name)
         
-        url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
-
-        headers = {
-        'Accept': 'application/json',
-        'X-M2M-RI': '12345',
-        'X-M2M-Origin': 'SOrigin'
-        }
-
-        response = requests.request("GET", url, headers=headers)
-        get_data = json.loads(response.text)
-        record = get_data['m2m:cin']['con']
-
-        #임시 이름
         read_name = self.object.name
-        image = record['image']
-        title = record['title']
-        text = record['intext']
-
-        # Observe.objects.create(
-        #     student = Student.objects.get(name = read_name),
-        #     image = image,
-        #     title = title,
-        #     content = text
-        # )
-        context['object'] = Observe.objects.filter(
+        context['observe'] = Observe.objects.filter(
             student = Student.objects.get(name = read_name)
             )
-
-        print('####')
-        print(context)
         return self.render_to_response(context)
 
 
@@ -173,47 +190,35 @@ class ItemUpdateView(DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        update_list= {
-            'item1' : {
-                'price' : self.request.POST.get('item1_price', ''),
-                'count' : self.request.POST.get('item1_count', ''),
-                'item' : Item.objects.filter(name='item1')
-            },
-            'item2' : {
-                'price' : self.request.POST.get('item2_price',''),
-                'count' : self.request.POST.get('item2_count',''),
-                'item' : Item.objects.filter(name='item2')
-            },
-            'item3' : {
-                'price' : self.request.POST.get('item3_price', ''),
-                'count' : self.request.POST.get('item3_count', ''),
-                'item' : Item.objects.filter(name='item3')
-            }   
-        }
+        update_list={}
+        
         #새 포인트 가격 저장, 수량 만큼 객체 생성,삭제
-        for num in update_list:
-            if update_list[num]['price'] != '':
-                new_price = update_list[num]['price']
+        
+        #post된 것들 가져오기
+        for item in ['item1', 'item2','item3']:
+            data = {
+                'price' : self.request.POST.get('{}_price'.format(item), '')
+            }
+            count = self.request.POST.get('{}_count'.format(item), '')
+            
+            if data['price'] != '':
+                # price = data['price']
+                Item.objects.filter(name= item).update(**data)
+            
+            if count != '':
+                old = Item.objects.filter(name=item).count()
+                new = int(count)
                 
-                for item in update_list[num]['item']:
-                    item.price = new_price
-                    item.save()
-             
-            if update_list[num]['count'] != '':
-                new = int(update_list[num]['count'])
-                old = update_list[num]['item'].count()
-
                 if new > old:
                     for i in range(new - old):
                         Item.objects.create(
                             student = self.object,
-                            name = num,
-                            price = items[num][0].price
+                            name = item,
+                            price = Item.objects.filter(name=item)[0].price
                         )
                 elif new < old:
                     for i in range(old - new ):
-                        last_obj = update_list[num]['item'].last()
-                        last_obj.delete()
+                        last_obj = Item.objects.filter(name=item).last().delete()
                         
         return redirect('administrator:home')
                 

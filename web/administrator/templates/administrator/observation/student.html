@@ -49,17 +49,17 @@
             {% block data %}
             {% for object in object_list %}
             {% if object.name == 'teacher' %} 
-
+            
             {% else %}
-            <tr>
-                <td><a href ="{% url 'administrator:log_detail' object.id %}" >{{ object.name }}</a></td>
-                <td>{{ object.observe_set.last.created_date|date:"Y-m-d  [H:i]" }}</td>
-                {% if object.observe_set.last.feedback %}
-                <td>O</td>
-                {% else %} 
-                <td>X</td>
-                {% endif %}
-            </tr>
+                <tr>
+                    <td><a href ="{% url 'administrator:log_detail' object.id %}" >{{ object.name }}</a></td>
+                    <td>{{ object.observe_set.last.receive_date }}</td>
+                    {% if object.observe_set.last.feedback %}
+                    <td>O</td>
+                    {% else %} 
+                    <td>X</td>
+                    {% endif %}
+                </tr>
             {% endif %}
             {% endfor %}
             {% endblock data %}

@@ -23,7 +23,8 @@ class Observe(models.Model):
     title = models.CharField(max_length=100, null=False)
     content = models.TextField(null=False)
     feedback = models.TextField(null=True, blank=True)
-    created_date = models.DateTimeField(auto_now_add=True)
+    receive_date = models.CharField(max_length=100, null=False)
+
 
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.student)

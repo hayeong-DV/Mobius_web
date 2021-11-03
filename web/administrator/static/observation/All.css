@@ -5,7 +5,7 @@ body{
     justify-content: center;
     align-items: center;
     background: rgb(255, 255, 255);
-    /* overflow-x:hidden; */
+    overflow:scroll;
 }
 
 header{
@@ -120,7 +120,7 @@ h1{
     width:500px;
     height:500px;
     /* left:270px; */
-    top:-50px;
+    top:-10px;
     z-index:2;
 }
 
@@ -169,10 +169,11 @@ h1{
     position:relative;
     width: 750px;
     height:200px;
-    top:-25px;  
+    top:10px;  
     /* left:230px; */
     margin-left: auto; 
     margin-right: auto;
+    margin-bottom:150px;
     text-align:center;
     border-collapse: collapse;
     border-top: 3px solid rgb(172, 204, 180);
@@ -205,3 +206,17 @@ h1{
 .plant_table caption{caption-side: bottom; display: none;
 }
 
+.feedback{
+    width:750px;
+    height:60px;
+    margin:auto;
+    /* border-top:none;
+    border-bottom: none; */
+}
+
+.btn{
+    margin-top:10px;
+    width:260px;
+    /* border-top:none;
+    border-bottom: none; */
+}
