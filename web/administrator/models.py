@@ -33,6 +33,7 @@ class Observe(models.Model):
 class Item(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) #상품 소유자, 구매자
     name = models.CharField(max_length=20, null=False) #상품이름
+    real_name =  models.CharField(max_length=20, null=False) 
     price = models.IntegerField( null=False ) #필요포인트
 
     def __str__(self): 

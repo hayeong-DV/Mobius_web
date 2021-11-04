@@ -19,7 +19,7 @@ urlpatterns=[
     path('point', views.PointView.as_view(), name='point_list'),
 
     #장터
-    # path('market', views.MarketView.as_view(), name='market'),
+    path('market', views.MarketView.as_view(), name='market'),
 
     #상품구매현황
     path('purchase', views.PurchaseView.as_view(), name='purchase'),

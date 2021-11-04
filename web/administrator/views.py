@@ -163,7 +163,6 @@ class PointView(ListView):
             }
         send_content = str(point_list)
 
-
         url = "http://203.253.128.161:7579/Mobius/AduFarm/point_list"
         payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + send_content  + '\"\n    }\n}'
         headers = {
@@ -178,28 +177,6 @@ class PointView(ListView):
         return redirect('administrator:point_list')
 
 
-
-
-        
-
-
-        
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def get_context(context):
     context['item1'] = Item.objects.filter(name='item1')
     context['item2'] = Item.objects.filter(name='item2')
@@ -212,13 +189,45 @@ def get_context(context):
 
 
 
-# class MarketView(ListView):
+class MarketView(ListView):
     #장터
-    # template_name = 
-    # model = Item
+    template_name = 'administrator/market/item_list.html'
+    model = Item
 
-    #장터 물품 전송해야하니 '개장' 같은 버튼 있었음 좋겠음
     #학생들이 보낸 이름,포인트, 상품 받아와서 제일 높은 포인트 낸 학생 저장
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        context = get_context(context)
+        return self.render_to_response(context) 
+        
+    def post(self, request, *args, **kwargs):
+        #일단 급하니 그냥 ㄱㄱㄱㄱ 나중에 정리
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/market_teacher"
+        headers = {
+            'Accept': 'application/json',
+            'X-M2M-RI': '12345',
+            'X-M2M-Origin': '{{aei}}',
+            'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
+            }
+        for i, item in enumerate(['item1','item2','item3']):
+            market_list =  {
+                "id" : i+1,
+                "name" : Item.objects.filter(name=item).first().real_name,
+                "qty" : Item.objects.filter(name=item).count()
+            }
+            payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + str(market_list)  + '\"\n    }\n}'
+            response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+            print('########')
+            print(response.text)
+        return redirect('administrator:market')
+                
+
+
+
+        
+
+
 
 
 

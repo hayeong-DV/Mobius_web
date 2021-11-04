@@ -1,0 +1,56 @@
+<!-- 전체 아이템 리스트 by 장터 -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>아이템 리스트</title>
+    <link rel="stylesheet" href="{% static 'item/All.css' %}">
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
+    
+   <div class="design">
+        <div id="student_list">
+             <header>
+            </header>
+            <div id="head">
+            <h1>아이템 리스트</h1>
+        </div>
+    
+        <div id="top">
+            <img id="topImg" src="{%static 'observation/student.jpg' %}"/>
+         </div>
+   </div> 
+
+   <form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input id = "post_button" role="button" type="submit" name="submit" value="장터 개시"/><br/>
+</form>
+
+    <div class="list con">
+        <ul class="row">
+            <li class="cell">
+                <div class="img-box"><img src="{%static 'observation/student.jpg' %}" alt=""></div>
+                <div class="product-name">자동 물주기 [ 수량: {{item1.count}} ]</div>
+                <div class="product-price">{{item1_price}}</div>
+            </li>
+            <li class="cell">
+                <div class="img-box"><img src=".{%static 'observation/student.jpg' %}" alt=""></div>
+                <div class="product-name"> 식물 자동 빛 주기 [ 수량: {{item2.count}} ] </div>
+                <div class="product-price">{{item2_price}}</div>
+                
+            </li>
+            <li class="cell">
+                <div class="img-box"><img src="{%static 'observation/student.jpg' %}" alt=""></div>
+                <div class="product-name"> 자동 무드등 [ 수량: {{item3.count}} ] </div>
+                <div class="product-price">{{item3_price}}</div>
+            </li>
+        </ul>
+  
+</body>
+
+
+</html>
