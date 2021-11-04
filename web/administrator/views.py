@@ -10,6 +10,10 @@ import requests
 import json
 import base64
 from django.core.files.base import ContentFile
+from PIL import Image
+from io import BytesIO
+import matplotlib.pyplot as plt
+
 # Create your views here.
 class HomeView(TemplateView):
     #메인화면- (일지목록, 포인트 항목, 장터) [O]
@@ -38,39 +42,51 @@ class ObserveLogView(ListView):
         # (record)cnt하나만 쓴다 하면 이름,날짜도 같이 받아오기
 
         #cin갯수에 따라 response데이터 받는거나중에 추가
-         
+        
         response = requests.request("GET", url, headers=headers)
         get_data = json.loads(response.text)
         record = get_data['m2m:cin']['con']
 
         read_name = record['id']
         image = record['image']
+        # print('###')
+        # print(read_image)
+        # # [B@52dd2d9
+        # print('###')
+        
+        # image = base64.b64decode(read_image)
+        # print('###')
+        # image = BytesIO(image)
+        # print(image)
+        # # <_io.BytesIO object at 0x7fa96b446950
+        # # print((image))
+        # # cannot identify image file <_io.BytesIO object at 0x7fb148dc7ae0>
+        # print('##1')
+
+    
         title = record['title']
         text = record['intext']
         date = record['date']
 
         context = self.get_context_data()
        
+       #나중에 받은 리스트만큼만 돌게 하기
         for student in self.object:
             #각 학생마다 가진 관찰일지 우선 할당
-            context[student.name]= student.observe_set.all()
+            # context[student.name]= student.observe_set.all()
             
             #새로운 관찰일지 생성
             #같은 날짜가 있다면 생성 x
+            #여기선 아니지만, create할 거 많다면 bulk create
             if student.name == read_name:
-                if context[student.name].filter(receive_date = date).exists():
-                    pass
-                else:
+                if not student.observe_set.filter(receive_date = date).exists():
                     Observe.objects.create(
-                        student = Student.objects.get(name = read_name),
+                        student = student,
                         image = image,
                         title = title,
                         content = text,
                         receive_date = date
                     )
-            # print('#############')
-            # print(context)
-            # print('#############')
         return self.render_to_response(context)
         
     
@@ -98,19 +114,22 @@ class LogDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         #피드백 (저장,전송) 확인상태 변경
         self.object = self.get_object()
-        feedback = self.request.POST['feedback']
-        self.object.feedback = feedback
-        self.object.check = 'O'
+        feedback = request.POST['feedback']
+        log_id = request.POST['observe__id']
+
+        obj = self.object.observe_set.get(id = log_id)
+        obj.feedback = feedback
+        obj.save()
+
+        #관찰일지 피드백 후 포인트 부여
+        #물준거 뭐냐 ?빛, cds? temp?humid도 뭐 줘야함??
+        self.object.point += 100
         self.object.save()
 
-        send_feed = self.object.feedback
-        
         #피드백 보내기
         url = "http://203.253.128.161:7579/Mobius/AduFarm/feedback"
 
-        payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + send_feed + '\"\n    }\n}'
-        print('####')
-        print(payload)
+        payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + obj.feedback  + '\"\n    }\n}'
 
         headers = {
         'Accept': 'application/json',
@@ -121,9 +140,9 @@ class LogDetailView(DetailView):
 
         response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
         
-        print('############')
-        print(response.text)
-        print('############')
+        # print('############')
+        # print(response.text)
+        # print('############')
         return redirect('administrator:observation')
 
 
@@ -132,13 +151,53 @@ class PointView(ListView):
     template_name = 'administrator/point/point_list.html'
     model = Point
 
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        #여기 
-        #post request
-        return HttpResponse
+    #항목 전송하는 버튼 필요
+    def post(self, request, *args, **kwargs):
+        point_list={}
+        # 또 for.........
+        for point_obj in self.get_queryset():
+            point_list[point_obj.name] = {
+                "action" : point_obj.action,
+                "payment" : point_obj.payment,
+                "num" : point_obj.number
+            }
+        send_content = str(point_list)
+
+
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/point_list"
+        payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + send_content  + '\"\n    }\n}'
+        headers = {
+            'Accept': 'application/json',
+            'X-M2M-RI': '12345',
+            'X-M2M-Origin': '{{aei}}',
+            'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
+            }
+
+        response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+
+        return redirect('administrator:point_list')
+
+
+
 
         
+
+
+        
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def get_context(context):
@@ -150,6 +209,18 @@ def get_context(context):
     context['item2_price'] = context['item2'][0].price
     context['item3_price'] = context['item3'][0].price
     return context
+
+
+
+# class MarketView(ListView):
+    #장터
+    # template_name = 
+    # model = Item
+
+    #장터 물품 전송해야하니 '개장' 같은 버튼 있었음 좋겠음
+    #학생들이 보낸 이름,포인트, 상품 받아와서 제일 높은 포인트 낸 학생 저장
+
+
 
 
 class PurchaseView(ListView):
@@ -176,7 +247,7 @@ class StudentLogView(ListView):
 
 
 class ItemUpdateView(DetailView):
-    #상품 관리
+    #상품 관리 [O]
     template_name = 'administrator/item/item.html'
     model = Student
     fields=['name','price']
@@ -197,9 +268,10 @@ class ItemUpdateView(DetailView):
         #post된 것들 가져오기
         for item in ['item1', 'item2','item3']:
             data = {
-                'price' : self.request.POST.get('{}_price'.format(item), '')
+                'price' : self.request.POST.get('{}_price'.format(item), ''),
             }
             count = self.request.POST.get('{}_count'.format(item), '')
+            
             
             if data['price'] != '':
                 # price = data['price']

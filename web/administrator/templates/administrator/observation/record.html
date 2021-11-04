@@ -11,7 +11,7 @@
 
 <body>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
-    
+      {% comment %} <script type="text/javascript" src="record.js"> </script>   {% endcomment %}
    <div class="design">
         <div id="student_list">
             <header>
@@ -37,24 +37,23 @@
                 <th >오늘의 관찰 일지</th>
             </tr>
             <tr>
-                <td>이름 : {{.student.name}}</td>
+                <td>이름 : {{student.name}}</td>
             </tr>
             <tr>
-                <td>{{object.created_date|date:"Y-m-d (D)"}}</td>
+                <td>{{object.receive_date}}</td>
             </tr>
             <tr>
                 <td>{{ object.content }}</td>
             </tr>
             <tr>
                 <td>
-                    <!-- <button id="button2" onclick="check1()">확인(자동 뒤로 가기)</button>
-                    <button id="button1" onclick="check2()">선생님 피드백</button> -->
                     {% if object.feedback %}
                     {{object.feedback}}
                     {% else %}
                     <form action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <textarea name="feedback" class='feedback'></textarea>
+                        <input type="hidden" name="observe__id" value="{{ object.id }}"/>
                         <input type="submit" role="button" class ="btn" value="완료">
                     </form>
                     {% endif %}
@@ -64,12 +63,7 @@
     </table>
 
 {% endfor %}
-    
 
-    
-   
-
-    <script type="text/javascript" src="record.js"> </script>  
    
   
 </body>
