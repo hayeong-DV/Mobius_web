@@ -177,7 +177,7 @@ class PointView(ListView):
         return redirect('administrator:point_list')
 
 
-def get_context(context):
+def get_data(context):
     context['item1'] = Item.objects.filter(name='item1')
     context['item2'] = Item.objects.filter(name='item2')
     context['item3'] = Item.objects.filter(name='item3')
@@ -198,11 +198,10 @@ class MarketView(ListView):
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
-        context = get_context(context)
+        context = get_data(context)
         return self.render_to_response(context) 
         
     def post(self, request, *args, **kwargs):
-        #일단 급하니 그냥 ㄱㄱㄱㄱ 나중에 정리
         url = "http://203.253.128.161:7579/Mobius/AduFarm/market_teacher"
         headers = {
             'Accept': 'application/json',
@@ -210,27 +209,26 @@ class MarketView(ListView):
             'X-M2M-Origin': '{{aei}}',
             'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
             }
-        for i, item in enumerate(['item1','item2','item3']):
-            market_list =  {
-                "id" : i+1,
-                "name" : Item.objects.filter(name=item).first().real_name,
-                "qty" : Item.objects.filter(name=item).count()
-            }
+        receive = self.request.POST['submit_start']
+        item_name_list = ['item1','item2','item3']
+
+        if receive == '장터 개시':
+        #일단 급하니 그냥 ㄱㄱㄱㄱ 나중에 정리
+            for item in item_name_list:
+                market_list =  {
+                    "id" : item,
+                    "name" : Item.objects.filter(name=item).first().real_name,
+                    "qty" : Item.objects.filter(name=item).count()
+                }
             payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + str(market_list)  + '\"\n    }\n}'
             response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
             print('########')
             print(response.text)
-        return redirect('administrator:market')
-                
-
-
-
+            return redirect('administrator:market')
+        else:
+            #여기서 해야하나
+            return redirect('administrator:purchase')
         
-
-
-
-
-
 
 class PurchaseView(ListView):
     #상품구매현황 [O]
@@ -238,9 +236,55 @@ class PurchaseView(ListView):
     model = Item
  
     def get(self, request, *args, **kwargs):
+        #아님 여기서 해아하나
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/auction?fu=2&lim=5&rcn=4"
+        headers = {
+            'Accept': 'application/json',
+            'X-M2M-RI': '12345',
+            'X-M2M-Origin': 'SOrigin'
+        }
+        #정보 받아옴
+        response = requests.request("GET", url, headers=headers)
+        text = response.text
+        json_data = json.loads(text)
+        rsp = json_data["m2m:rsp"]
+        cin = rsp["m2m:cin"]
+     
+        dict = {} #딕셔너리 선언
+
+        for i in range(len(cin)): #cin 갯수 만큼 받아와서 딕셔너리에 추가
+            # print(cin[i])
+            con = cin[i]["con"]
+            user = Student.objects.get(name = con["user"])
+            point = con["point"]
+            item = con["item"]
+            dict[user] = { 
+                "point" : point,
+                "item" : item
+            } #딕셔너리에 con값 추가
+        
+        #일단 ㄱ
+        print(dict)
+    
+        # aution_list = sorted(dict.items(), key=lambda x:x[1], reverse=True)
+
+        # print(aution_list) #이해를 돕기 위한 정렬된 딕셔너리 전체 출력
+        # print(aution_list[:3]) #상위 3명 출력
+        # print(aution_list[0][0]) #1등의 이름 출력! 포인트 출력하려면 [0][1]로 고쳐주면 돼
+
+
+
+
+
+
+
+
+
+
         self.object_list = self.get_queryset()
+
         context = self.get_context_data()
-        context = get_context(context)
+        context = get_data(context)
         return self.render_to_response(context) 
         
 
@@ -265,7 +309,7 @@ class ItemUpdateView(DetailView):
         self.object = self.get_object()
        
         context = self.get_context_data() 
-        context = get_context(context) 
+        context = get_data(context) 
         return self.render_to_response(context) 
 
     def post(self, request, *args, **kwargs):
