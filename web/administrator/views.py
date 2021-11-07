@@ -120,10 +120,15 @@ class LogDetailView(DetailView):
         obj = self.object.observe_set.get(id = log_id)
         obj.feedback = feedback
         obj.save()
+        
 
         #관찰일지 피드백 후 포인트 부여
-        #물준거 뭐냐 ?빛, cds? temp?humid도 뭐 줘야함??
-        self.object.point += 100
+        #물 줬으면 포인트 부여
+        if obj.water == 1:
+            self.object.point +=100
+        
+        #관찰일지 있다는 가정이니 포인트 부여
+        self.object.point += 500
         self.object.save()
 
         #피드백 보내기
@@ -138,7 +143,7 @@ class LogDetailView(DetailView):
         'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
         }
 
-        response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+        # response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
         
         # print('############')
         # print(response.text)
@@ -200,7 +205,8 @@ class MarketView(ListView):
         context = self.get_context_data()
         context = get_data(context)
         return self.render_to_response(context) 
-        
+    
+    #장터 목록 개시
     def post(self, request, *args, **kwargs):
         url = "http://203.253.128.161:7579/Mobius/AduFarm/market_teacher"
         headers = {
@@ -209,24 +215,26 @@ class MarketView(ListView):
             'X-M2M-Origin': '{{aei}}',
             'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
             }
-        receive = self.request.POST['submit_start']
+        receive = self.request.POST['submit']
         item_name_list = ['item1','item2','item3']
 
         if receive == '장터 개시':
-        #일단 급하니 그냥 ㄱㄱㄱㄱ 나중에 정리
+        #일단 급하니 그냥 ㄱㄱㄱㄱ 나중에 정리 > 시리얼라이저로
+            market_list= {}
             for item in item_name_list:
                 market_list =  {
                     "id" : item,
                     "name" : Item.objects.filter(name=item).first().real_name,
                     "qty" : Item.objects.filter(name=item).count()
                 }
-            payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + str(market_list)  + '\"\n    }\n}'
-            response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
-            print('########')
-            print(response.text)
+                market_list = json.dumps(market_list)
+                payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(market_list)  + '\n    }\n}'
+                response = requests.request("POST", url, headers=headers, data= payload.encode('UTF-8'))
+                print('########')
+                print(response.text)
             return redirect('administrator:market')
         else:
-            #여기서 해야하나
+            #장터 마감
             return redirect('administrator:purchase')
         
 
@@ -236,6 +244,7 @@ class PurchaseView(ListView):
     model = Item
  
     def get(self, request, *args, **kwargs):
+        #학생들 구매상품 우선순위 정렬, 보유 포인트 수정
         #아님 여기서 해아하나
         url = "http://203.253.128.161:7579/Mobius/AduFarm/auction?fu=2&lim=5&rcn=4"
         headers = {
@@ -249,36 +258,46 @@ class PurchaseView(ListView):
         json_data = json.loads(text)
         rsp = json_data["m2m:rsp"]
         cin = rsp["m2m:cin"]
-     
-        dict = {} #딕셔너리 선언
+
+        buy_dict={
+            "item1":[],
+            "item2":[],
+            "item3":[]
+        }
 
         for i in range(len(cin)): #cin 갯수 만큼 받아와서 딕셔너리에 추가
             # print(cin[i])
             con = cin[i]["con"]
-            user = Student.objects.get(name = con["user"])
+            # user = Student.objects.get(name = con["user"])
+            user = con["user"]
             point = con["point"]
             item = con["item"]
-            dict[user] = { 
-                "point" : point,
-                "item" : item
-            } #딕셔너리에 con값 추가
-        
+            buy_dict[item].append(
+                (item, user, point)
+            )
+
+        print(buy_dict)
+        result = {}
         #일단 ㄱ
-        print(dict)
-    
+        for item in buy_dict:
+            # 상품구매자가 1명 이상일때,
+            if len(buy_dict[item]) > 1:
+                test = sorted(buy_dict[item], )
+                print(test)
+                # for i, item in enumerate(buy_dict[item]):
+                #     print(i, item)
+                # result[item] = sorted(buy_dict[item], key=lambda x: x[1])
+                
+       
+
+         
+         
+        
         # aution_list = sorted(dict.items(), key=lambda x:x[1], reverse=True)
 
         # print(aution_list) #이해를 돕기 위한 정렬된 딕셔너리 전체 출력
         # print(aution_list[:3]) #상위 3명 출력
         # print(aution_list[0][0]) #1등의 이름 출력! 포인트 출력하려면 [0][1]로 고쳐주면 돼
-
-
-
-
-
-
-
-
 
 
         self.object_list = self.get_queryset()
