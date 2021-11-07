@@ -4,15 +4,18 @@ from django.views.generic import(
     CreateView, UpdateView, DeleteView
 )
 from django.urls import reverse_lazy
+from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
 from administrator.models import *
 import requests
 import json
 import base64
-from django.core.files.base import ContentFile
+
 from PIL import Image
 from io import BytesIO
 import matplotlib.pyplot as plt
+from django.core.files.base import ContentFile
+from django.db.models import Q
 
 # Create your views here.
 class HomeView(TemplateView):
@@ -48,24 +51,12 @@ class ObserveLogView(ListView):
         record = get_data['m2m:cin']['con']
 
         read_name = record['id']
-        image = record['image']
-        # print('###')
-        # print(read_image)
-        # # [B@52dd2d9
-        # print('###')
-        
-        # image = base64.b64decode(read_image)
-        # print('###')
-        # image = BytesIO(image)
-        # print(image)
-        # # <_io.BytesIO object at 0x7fa96b446950
-        # # print((image))
-        # # cannot identify image file <_io.BytesIO object at 0x7fb148dc7ae0>
-        # print('##1')
+        image = Image.open(BytesIO(base64.b64decode(record['image'])))
+        print(image)
 
-    
         title = record['title']
         text = record['intext']
+        water = record['water']
         date = record['date']
 
         context = self.get_context_data()
@@ -82,9 +73,10 @@ class ObserveLogView(ListView):
                 if not student.observe_set.filter(receive_date = date).exists():
                     Observe.objects.create(
                         student = student,
-                        image = image,
+                        image = image.save( '{}.png'.format(read_name), 'PNG'),
                         title = title,
                         content = text,
+                        water = water,
                         receive_date = date
                     )
         return self.render_to_response(context)
@@ -182,14 +174,16 @@ class PointView(ListView):
         return redirect('administrator:point_list')
 
 
-def get_data(context):
-    context['item1'] = Item.objects.filter(name='item1')
-    context['item2'] = Item.objects.filter(name='item2')
-    context['item3'] = Item.objects.filter(name='item3')
-    
-    context['item1_price'] = context['item1'][0].price
-    context['item2_price'] = context['item2'][0].price
-    context['item3_price'] = context['item3'][0].price
+def get_data(context):  
+    for item in ['item1','item2','item3']:
+        if Item.objects.filter(name=item, student__name ='teacher'):
+            print('get_data:', item)
+            context[item] = Item.objects.filter(name= item, student__name ='teacher')
+            context['{}_price'.format(item)] = context[item][0].price
+        else:
+            context[item] = Item.objects.filter(name='{}_save'.format(item))
+            context['{}_price'.format(item)] = context[item][0].price
+        
     return context
 
 
@@ -235,11 +229,12 @@ class MarketView(ListView):
             return redirect('administrator:market')
         else:
             #장터 마감
+            
             return redirect('administrator:purchase')
         
 
 class PurchaseView(ListView):
-    #상품구매현황 [O]
+    #상품구매현황_계산용 [O]
     template_name = 'administrator/purchase/check.html'
     model = Item
  
@@ -265,47 +260,123 @@ class PurchaseView(ListView):
             "item3":[]
         }
 
-        for i in range(len(cin)): #cin 갯수 만큼 받아와서 딕셔너리에 추가
-            # print(cin[i])
-            con = cin[i]["con"]
-            # user = Student.objects.get(name = con["user"])
-            user = con["user"]
-            point = con["point"]
-            item = con["item"]
-            buy_dict[item].append(
-                (item, user, point)
-            )
+        # for i in range(len(cin)): #cin 갯수 만큼 받아와서 딕셔너리에 추가
+        #     # print(cin[i])
+        #     con = cin[i]["con"]
+        #     # user = Student.objects.get(name = con["user"])
+        #     user = con["user"]
+        #     point = con["point"]
+        #     item = con["item"]
+        #     buy_dict[item].append(
+        #         (item, user, point)
+        #     )
 
-        print(buy_dict)
-        result = {}
-        #일단 ㄱ
-        for item in buy_dict:
-            # 상품구매자가 1명 이상일때,
-            if len(buy_dict[item]) > 1:
-                test = sorted(buy_dict[item], )
-                print(test)
-                # for i, item in enumerate(buy_dict[item]):
-                #     print(i, item)
-                # result[item] = sorted(buy_dict[item], key=lambda x: x[1])
+        # #일단 ㄱ
+        # sort_list = {}
+        # for item in buy_dict:
+        #     print('currnet_item1: ', item)
+        #     sort_list[item] = sorted(buy_dict[item], key=lambda x:x[2], reverse=True)
+
+        #     coupon = Item.objects.filter(name = item, student__name = 'teacher')
                 
-       
+        #     if sort_list[item] != [] and len(sort_list[item]) > 1:
+        #         print('currnet_item2: ', item)
 
-         
-         
+        #         for i in range(len(sort_list[item])):
+        #             if (coupon.count() > 0) :
+        #                 buy_user = sort_list[item][i][1]
+        #                 use_point = sort_list[item][i][2]
+
+        #                 update =coupon.first()
+        #                 if update == None:
+        #                     pass
+        #                 else:
+        #                     update.student = Student.objects.get(name = buy_user) 
+        #                     update.save()
+
+        #                     print(update.name, update.student)
+        #                     print('###################')
+
+        #                     student = Student.objects.get(name = buy_user)
+        #                     student.point -= int(use_point)
+        #                     student.point_used += int(use_point)
+        #                     student.save()
+
+        #     elif sort_list[item] != []:
+        #         print(sort_list[item])
+        #         buy_user = sort_list[item][0][1]
+        #         use_point = sort_list[item][0][2]
+
+        #         update =coupon.first()
+        #         if update == None:
+        #             pass
+        #         else:
+        #             print('obj:', update)
+        #             update.student = Student.objects.get(name = buy_user) 
+        #             update.save()
+
+        #             print(update.name, update.student)
+        #             print('###################')
+
+        #=--------------------------------post해야함
+        #아이템 구매내역 유저별 상세 결과
+        # +유저별로 중첩cnt해서 거기에 
+        # con : {
+        #     “item1”:false,
+        #     “item2:false,
+        #     “item3”:false
+        # }
+
+        #아이템 구매내역 전체 결과
+        #아이템 구매내역 유저별 상세 결과
+
+        #유저별 포인트 사용내역
+
+
+    
+
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+        for item in ['item1','item2','item3']:
+            if Item.objects.filter(name=item):
+                context[item] = Item.objects.filter(name= item)
+                context['{}_price'.format(item)] = context[item][0].price
+                context['{}_count'.format(item)] = context[item].filter(student__name ='teacher').count()
+                print( context['{}_count'.format(item)])
+            else:
+                context[item] = Item.objects.filter(name='{}_save'.format(item))
+                context['{}_price'.format(item)] = context[item][0].price
+                context['{}_count'.format(item)] = context[item].filter(student__name ='teacher').count()
         
-        # aution_list = sorted(dict.items(), key=lambda x:x[1], reverse=True)
-
-        # print(aution_list) #이해를 돕기 위한 정렬된 딕셔너리 전체 출력
-        # print(aution_list[:3]) #상위 3명 출력
-        # print(aution_list[0][0]) #1등의 이름 출력! 포인트 출력하려면 [0][1]로 고쳐주면 돼
+        return self.render_to_response(context) 
 
 
+
+class CheckPurchaseView(ListView):
+    #상품구매현황_확인용 [O]
+    template_name = 'administrator/purchase/check_view.html'
+    model = Item
+
+    def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
 
         context = self.get_context_data()
-        context = get_data(context)
+        for item in ['item1','item2','item3']:
+            if Item.objects.filter(name=item):
+                context[item] = Item.objects.filter(name= item)
+                context['{}_price'.format(item)] = context[item][0].price
+                context['{}_count'.format(item)] = context[item].filter(student__name ='teacher').count()
+                print( context['{}_count'.format(item)])
+            else:
+                context[item] = Item.objects.filter(name='{}_save'.format(item))
+                context['{}_price'.format(item)] = context[item][0].price
+                context['{}_count'.format(item)] = context[item].filter(student__name ='teacher').count()
+                
         return self.render_to_response(context) 
-        
+
+
+
+
 
 class RequirementView(ListView):
     #요구사항 페이지 [O]
@@ -348,10 +419,12 @@ class ItemUpdateView(DetailView):
             if data['price'] != '':
                 # price = data['price']
                 Item.objects.filter(name= item).update(**data)
+                Item.objects.filter(name= '{}_save'.format(item)).update(**data)
             
             if count != '':
-                old = Item.objects.filter(name=item).count()
+                old = Item.objects.filter(name=item, student__name = 'teacher').count()
                 new = int(count)
+                print('#########',old,new)
                 
                 if new > old:
                     for i in range(new - old):
@@ -363,6 +436,17 @@ class ItemUpdateView(DetailView):
                 elif new < old:
                     for i in range(old - new ):
                         last_obj = Item.objects.filter(name=item).last().delete()
+            
+                elif old == '':
+                    for i in range(new+1):
+                        Item.objects.create(
+                            student = self.object,
+                            name = item,
+                            price = Item.objects.get(name='{}_save'.format(item)).price
+                        )
+
+
+
                         
         return redirect('administrator:home')
                 

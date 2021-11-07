@@ -21,8 +21,11 @@ urlpatterns=[
     #장터
     path('market', views.MarketView.as_view(), name='market'),
 
-    #상품구매현황
+    #상품구매현황(상품, 포인트 정렬, 계산)
     path('purchase', views.PurchaseView.as_view(), name='purchase'),
+
+    #상품구매현황_확인용)
+    path('check-purchase', views.CheckPurchaseView.as_view(), name='check_purchase'),
     
     #요구사항 페이지
     path('requirement', views.RequirementView.as_view(), name='requirement'),
