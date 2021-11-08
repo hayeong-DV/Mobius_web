@@ -51,13 +51,22 @@
             <div class='menu_list'>
                 <ul>
                     <li class='menu_box'>
-                        <a href="{% url 'administrator:observation' %}">관찰일지 목록</a>
+                        <a href="{% url 'administrator:observation' %}">
+                        {% comment %} 관찰일지 목록 {% endcomment %}
+                        <img class='img_main_foot' src="{%static 'main/observe.png' %}"/>
+                        </a>
                     </li>
                     <li class='menu_box'>
-                        <a href="{% url 'administrator:point_list' %}">포인트 항목</a>
+                        <a href="{% url 'administrator:point_list' %}">
+                        {% comment %} 포인트 항목 {% endcomment %}
+                        <img class='img_main_foot' src="{%static 'main/point_list.png' %}"/>
+                        </a>
                     </li>
                     <li class='menu_box'>
-                        <a href="{% url 'administrator:market' %}">장터</a>
+                        <a href="{% url 'administrator:market' %}">
+                        {% comment %} 장터 {% endcomment %}
+                        <img class='img_main_foot' src="{%static 'main/market.png' %}"/>
+                        </a>
                     </li>
                     <!-- <li class='menu_box'>
                         <a href="">링크당</a>

@@ -29,7 +29,11 @@
 
 {% for object in observe reversed %}
     <div id = "plant_image">
-        <img id="P_img" src="{{ object.image }}"/>
+        {% if object.image %}
+        <img id="P_img" src="{{ object.image.url }}"/>
+        {% else %}
+        <img id="P_img" src=""/>
+        {% endif %}
     </div>
     <table class="plant_table">
         <thead>

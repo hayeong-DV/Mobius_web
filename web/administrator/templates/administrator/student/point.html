@@ -17,9 +17,18 @@
 {% endblock subject %}
     
 {% block top %}
-    <img id="topImg" src="{%static 'observation/observation_img/student.jpg' %}"/>
+    <img id="topImg" src="{%static 'main/coin.png' %}"/>
 {% endblock top %}
+
+
+{%block content %}
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input id = "post_button" role="button" type="submit" name="submit_point" value="학생별 포인트 내역 전송"/><br/>
+</form>
+{% endblock %}
    
+
 {% block table %}
     <th >이름</th>
     <th >현재 보유 포인트</th>

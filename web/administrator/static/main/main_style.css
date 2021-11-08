@@ -163,3 +163,12 @@ header .inner .logo {
     border-radius:20px;
     /* border-radius:1000px; */
 }
+
+.img_main_foot{
+    width:400px;
+    height:270px;
+}
+
+.main_foot_p{
+    z-index: 2;
+}

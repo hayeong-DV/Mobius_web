@@ -10,6 +10,7 @@ from administrator.models import *
 import requests
 import json
 import base64
+import datetime
 
 from PIL import Image
 from io import BytesIO
@@ -32,7 +33,7 @@ class ObserveLogView(ListView):
         self.object = self.get_queryset()
         self.object_list = self.object
         
-        #ㅅ학생수 만큼 cin가져오기
+        #학생수 만큼 cin가져오기
         url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
 
         headers = {
@@ -41,18 +42,17 @@ class ObserveLogView(ListView):
         'X-M2M-Origin': 'SOrigin'
         }
 
-        #일지 올릴때 (record)cnt에 모든 애들이 다올리는거지? - O
-        # (record)cnt하나만 쓴다 하면 이름,날짜도 같이 받아오기
-
         #cin갯수에 따라 response데이터 받는거나중에 추가
-        
         response = requests.request("GET", url, headers=headers)
         get_data = json.loads(response.text)
         record = get_data['m2m:cin']['con']
 
         read_name = record['id']
-        image = Image.open(BytesIO(base64.b64decode(record['image'])))
-        print(image)
+        print(read_name)
+
+        #####물어볼거
+        image = base64.b64decode(record['image'])
+        #####
 
         title = record['title']
         text = record['intext']
@@ -73,7 +73,10 @@ class ObserveLogView(ListView):
                 if not student.observe_set.filter(receive_date = date).exists():
                     Observe.objects.create(
                         student = student,
-                        image = image.save( '{}.png'.format(read_name), 'PNG'),
+                        image = ContentFile(
+                            image,
+                            student.name + str(datetime.datetime.now()).split(".")[0] + ".jpg"
+                        ),
                         title = title,
                         content = text,
                         water = water,
@@ -177,7 +180,6 @@ class PointView(ListView):
 def get_data(context):  
     for item in ['item1','item2','item3']:
         if Item.objects.filter(name=item, student__name ='teacher'):
-            print('get_data:', item)
             context[item] = Item.objects.filter(name= item, student__name ='teacher')
             context['{}_price'.format(item)] = context[item][0].price
         else:
@@ -209,7 +211,7 @@ class MarketView(ListView):
             'X-M2M-Origin': '{{aei}}',
             'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
             }
-        receive = self.request.POST['submit']
+        receive = self.request.POST['submit_btn']
         item_name_list = ['item1','item2','item3']
 
         if receive == '장터 개시':
@@ -224,8 +226,6 @@ class MarketView(ListView):
                 market_list = json.dumps(market_list)
                 payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(market_list)  + '\n    }\n}'
                 response = requests.request("POST", url, headers=headers, data= payload.encode('UTF-8'))
-                print('########')
-                print(response.text)
             return redirect('administrator:market')
         else:
             #장터 마감
@@ -260,80 +260,136 @@ class PurchaseView(ListView):
             "item3":[]
         }
 
-        # for i in range(len(cin)): #cin 갯수 만큼 받아와서 딕셔너리에 추가
-        #     # print(cin[i])
-        #     con = cin[i]["con"]
-        #     # user = Student.objects.get(name = con["user"])
-        #     user = con["user"]
-        #     point = con["point"]
-        #     item = con["item"]
-        #     buy_dict[item].append(
-        #         (item, user, point)
-        #     )
+        for i in range(len(cin)): #cin 갯수 만큼 받아와서 딕셔너리에 추가
+            # print(cin[i])
+            con = cin[i]["con"]
+            # user = Student.objects.get(name = con["user"])
+            user = con["user"]
+            point = con["point"]
+            item = con["item"]
+            buy_dict[item].append(
+                (item, user, point)
+            )
 
-        # #일단 ㄱ
-        # sort_list = {}
-        # for item in buy_dict:
-        #     print('currnet_item1: ', item)
-        #     sort_list[item] = sorted(buy_dict[item], key=lambda x:x[2], reverse=True)
+        # 일단 ㄱ
+        sort_list = {}
+        result = []
+        for item in buy_dict:
+            print('currnet_item1: ', item)
+            sort_list[item] = sorted(buy_dict[item], key=lambda x:x[2], reverse=True)
 
-        #     coupon = Item.objects.filter(name = item, student__name = 'teacher')
+            coupon = Item.objects.filter(name = item, student__name = 'teacher')
                 
-        #     if sort_list[item] != [] and len(sort_list[item]) > 1:
-        #         print('currnet_item2: ', item)
+            if sort_list[item] != [] and len(sort_list[item]) > 1:
+                print('currnet_item2: ', item)
 
-        #         for i in range(len(sort_list[item])):
-        #             if (coupon.count() > 0) :
-        #                 buy_user = sort_list[item][i][1]
-        #                 use_point = sort_list[item][i][2]
+                for i in range(len(sort_list[item])):
+                    if (coupon.count() > 0) :
+                        buy_item =  sort_list[item][i][0]
+                        buy_user = sort_list[item][i][1]
+                        use_point = sort_list[item][i][2]
 
-        #                 update =coupon.first()
-        #                 if update == None:
-        #                     pass
-        #                 else:
-        #                     update.student = Student.objects.get(name = buy_user) 
-        #                     update.save()
+                        update =coupon.first()
+                        if update != None:
+                            update.student = Student.objects.get(name = buy_user) 
+                            update.save()
+                            result.append({
+                                "user" : update.student,
+                                "item": update.name,
+                                "name" : update.real_name,
+                                "point" : use_point,
+                            })
+                            student = Student.objects.get(name = buy_user)
+                            student.point -= int(use_point)
+                            student.point_used += int(use_point)
+                            student.save()
 
-        #                     print(update.name, update.student)
-        #                     print('###################')
+            elif sort_list[item] != []:
+                buy_item =  sort_list[item][0][0]
+                buy_user = sort_list[item][0][1]
+                use_point = sort_list[item][0][2]
 
-        #                     student = Student.objects.get(name = buy_user)
-        #                     student.point -= int(use_point)
-        #                     student.point_used += int(use_point)
-        #                     student.save()
-
-        #     elif sort_list[item] != []:
-        #         print(sort_list[item])
-        #         buy_user = sort_list[item][0][1]
-        #         use_point = sort_list[item][0][2]
-
-        #         update =coupon.first()
-        #         if update == None:
-        #             pass
-        #         else:
-        #             print('obj:', update)
-        #             update.student = Student.objects.get(name = buy_user) 
-        #             update.save()
-
-        #             print(update.name, update.student)
-        #             print('###################')
+                update =coupon.first()
+                if update != None:
+                    print('obj:', update)
+                    update.student = Student.objects.get(name = buy_user) 
+                    update.save()
+                    result.append({
+                                "user" : update.student,
+                                "item": update.name,
+                                "name" : update.real_name,
+                                "point" : use_point,
+                            })
+                    student = Student.objects.get(name = buy_user)
+                    student.point -= int(use_point)
+                    student.point_used += int(use_point)
+                    student.save()
 
         #=--------------------------------post해야함
-        #아이템 구매내역 유저별 상세 결과
-        # +유저별로 중첩cnt해서 거기에 
-        # con : {
-        #     “item1”:false,
-        #     “item2:false,
-        #     “item3”:false
-        # }
-
-        #아이템 구매내역 전체 결과
-        #아이템 구매내역 유저별 상세 결과
-
-        #유저별 포인트 사용내역
+        #test
+        # result =[
+        #     {'user': Student.objects.get(name = 'studentA'), 'item': 'item1', 'name': '자동 물 주기', 'point': '1200'}, 
+        #     {'user': Student.objects.get(name = 'studentB'), 'item': 'item3', 'name': '자동 무드등 작동', 'point': '2200'}, 
+        #     {'user': Student.objects.get(name = 'studentA'), 'item': 'item3', 'name': '자동 무드등 작동', 'point': '2000'}, 
+        # ]
 
 
-    
+        #아이템 구매내역 전체 결과 전송 - result
+        #아이템 구매내역 유저별 상세 결과 전송
+        url_access = "http://203.253.128.161:7579/Mobius/AduFarm/market_access"
+        headers = {
+        'Accept': 'application/json',
+        'X-M2M-RI': '12345',
+        'X-M2M-Origin': '{{aei}}',
+        'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
+        }
+
+        user_list =[]
+        for i, result_list in enumerate(result):
+            user = result_list['user']
+            result[i]['user'] = user.name  
+
+            if user.name not in user_list:
+                user_list.append(user.name) 
+                
+                all_item = Item.objects.filter(student=user)
+                user_item = {
+                    "item1": str(False if all_item.filter(name='item1').first() == None else True),
+                    "item2": str(False if all_item.filter(name='item2').first() == None else True),
+                    "item3": str(False if all_item.filter(name='item3').first() == None else True)
+                }
+                user_item = json.dumps(user_item)
+                print('------사용자별 아이템-------')
+                print(user.name,'  ', user_item)
+                url_user = "http://203.253.128.161:7579/Mobius/AduFarm/market_access/{}".format(user.name)
+                payload_user='{\n    \"m2m:cin\": {\n        \"con\": ' + str(user_item)  + '\n    }\n}'
+                response_user = requests.request("POST", url_user, headers=headers, data=payload_user.encode('UTF-8'))
+                print(response_user.text)
+                print('-------------------------------')
+            
+
+            result_list = json.dumps(result_list)
+            print('------전체 아이템 구매내역------')
+            print(result_list)
+            payload_access='{\n    \"m2m:cin\": {\n        \"con\": ' + str(result_list)  + '\n    }\n}'
+            response_access = requests.request("POST", url_access, headers=headers, data=payload_access.encode('UTF-8'))
+            print(response_access.text)
+            print('-------------------------------')
+         
+            #참고 형식
+            # con : {
+            #     “user”: “studentA”,
+            #     “item”: “item3”,
+            #     “name”: “자동환풍기 제어”
+            #     “point”: 2000
+            #     }
+            
+                # +유저별로 중첩cnt해서 거기에 
+                # con : {
+                #     “item1”:false,
+                #     “item2:false,
+                #     “item3”:false
+                # }
 
         self.object_list = self.get_queryset()
         context = self.get_context_data()
@@ -387,6 +443,37 @@ class StudentLogView(ListView):
     #학생별 포인트 현황 목록 [O]
     template_name = 'administrator/student/point.html'
     model = Student
+
+    def post(self, request, *args, **kwargs):
+        receive = request.POST['submit_point']
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/havepoint"
+        headers = {
+            'Accept': 'application/json',
+            'X-M2M-RI': '12345',
+            'X-M2M-Origin': '{{aei}}',
+            'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
+            }
+            
+        if receive == '학생별 포인트 내역 전송':
+            students_set = self.get_queryset().exclude(name = 'teacher')
+            # 형식
+            # name: "studentB"    
+            # hp: "3000"
+
+            for student in students_set:
+                send_hp = {
+                    "name" : student.name,
+                    "hp" : student.point
+                }
+                print(send_hp)
+                send_hp = json.dumps(send_hp)
+
+                payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(send_hp)  + '\n    }\n}'
+                response_access = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+                print(response_access.text)
+
+        return redirect('administrator:student-log')
+
 
 
 class ItemUpdateView(DetailView):
@@ -444,9 +531,6 @@ class ItemUpdateView(DetailView):
                             name = item,
                             price = Item.objects.get(name='{}_save'.format(item)).price
                         )
-
-
-
                         
         return redirect('administrator:home')
                 
