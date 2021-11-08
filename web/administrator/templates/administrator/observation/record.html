@@ -32,7 +32,7 @@
         {% if object.image %}
         <img id="P_img" src="{{ object.image.url }}"/>
         {% else %}
-        <img id="P_img" src=""/>
+        <img id="P_img" src="{{ object.image}}"/>
         {% endif %}
     </div>
     <table class="plant_table">
@@ -65,6 +65,7 @@
             </tr>
         </thead>
     </table>
+ 
 
 {% endfor %}
 

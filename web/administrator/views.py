@@ -3,9 +3,9 @@ from django.views.generic import(
     ListView, DetailView, TemplateView,
     CreateView, UpdateView, DeleteView
 )
-from django.urls import reverse_lazy
-from django.conf import settings
-from django.shortcuts import get_object_or_404, redirect
+# from django.urls import reverse_lazy
+# from django.conf import settings
+from django.shortcuts import redirect
 from administrator.models import *
 import requests
 import json
@@ -17,6 +17,22 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from django.core.files.base import ContentFile
 from django.db.models import Q
+
+
+
+get_headers = {
+    'Accept': 'application/json',
+    'X-M2M-RI': '12345',
+    'X-M2M-Origin': 'SOrigin'
+}
+
+post_headers = {
+    'Accept': 'application/json',
+    'X-M2M-RI': '12345',
+    'X-M2M-Origin': '{{aei}}',
+    'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
+}
+
 
 # Create your views here.
 class HomeView(TemplateView):
@@ -36,14 +52,8 @@ class ObserveLogView(ListView):
         #학생수 만큼 cin가져오기
         url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
 
-        headers = {
-        'Accept': 'application/json',
-        'X-M2M-RI': '12345',
-        'X-M2M-Origin': 'SOrigin'
-        }
-
         #cin갯수에 따라 response데이터 받는거나중에 추가
-        response = requests.request("GET", url, headers=headers)
+        response = requests.request("GET", url, headers=get_headers)
         get_data = json.loads(response.text)
         record = get_data['m2m:cin']['con']
 
@@ -130,15 +140,7 @@ class LogDetailView(DetailView):
         url = "http://203.253.128.161:7579/Mobius/AduFarm/feedback"
 
         payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + obj.feedback  + '\"\n    }\n}'
-
-        headers = {
-        'Accept': 'application/json',
-        'X-M2M-RI': '12345',
-        'X-M2M-Origin': '{{aei}}',
-        'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
-        }
-
-        # response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+        response = requests.request("POST", url, headers=post_headers, data=payload.encode('UTF-8'))
         
         # print('############')
         # print(response.text)
@@ -165,14 +167,8 @@ class PointView(ListView):
 
         url = "http://203.253.128.161:7579/Mobius/AduFarm/point_list"
         payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + send_content  + '\"\n    }\n}'
-        headers = {
-            'Accept': 'application/json',
-            'X-M2M-RI': '12345',
-            'X-M2M-Origin': '{{aei}}',
-            'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
-            }
 
-        response = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+        response = requests.request("POST", url, headers=post_headers, data=payload.encode('UTF-8'))
 
         return redirect('administrator:point_list')
 
@@ -205,12 +201,7 @@ class MarketView(ListView):
     #장터 목록 개시
     def post(self, request, *args, **kwargs):
         url = "http://203.253.128.161:7579/Mobius/AduFarm/market_teacher"
-        headers = {
-            'Accept': 'application/json',
-            'X-M2M-RI': '12345',
-            'X-M2M-Origin': '{{aei}}',
-            'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
-            }
+
         receive = self.request.POST['submit_btn']
         item_name_list = ['item1','item2','item3']
 
@@ -225,7 +216,7 @@ class MarketView(ListView):
                 }
                 market_list = json.dumps(market_list)
                 payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(market_list)  + '\n    }\n}'
-                response = requests.request("POST", url, headers=headers, data= payload.encode('UTF-8'))
+                response = requests.request("POST", url, headers=post_headers, data= payload.encode('UTF-8'))
             return redirect('administrator:market')
         else:
             #장터 마감
@@ -242,13 +233,9 @@ class PurchaseView(ListView):
         #학생들 구매상품 우선순위 정렬, 보유 포인트 수정
         #아님 여기서 해아하나
         url = "http://203.253.128.161:7579/Mobius/AduFarm/auction?fu=2&lim=5&rcn=4"
-        headers = {
-            'Accept': 'application/json',
-            'X-M2M-RI': '12345',
-            'X-M2M-Origin': 'SOrigin'
-        }
+      
         #정보 받아옴
-        response = requests.request("GET", url, headers=headers)
+        response = requests.request("GET", url, headers=get_headers)
         text = response.text
         json_data = json.loads(text)
         rsp = json_data["m2m:rsp"]
@@ -337,13 +324,7 @@ class PurchaseView(ListView):
         #아이템 구매내역 전체 결과 전송 - result
         #아이템 구매내역 유저별 상세 결과 전송
         url_access = "http://203.253.128.161:7579/Mobius/AduFarm/market_access"
-        headers = {
-        'Accept': 'application/json',
-        'X-M2M-RI': '12345',
-        'X-M2M-Origin': '{{aei}}',
-        'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
-        }
-
+        
         user_list =[]
         for i, result_list in enumerate(result):
             user = result_list['user']
@@ -363,7 +344,7 @@ class PurchaseView(ListView):
                 print(user.name,'  ', user_item)
                 url_user = "http://203.253.128.161:7579/Mobius/AduFarm/market_access/{}".format(user.name)
                 payload_user='{\n    \"m2m:cin\": {\n        \"con\": ' + str(user_item)  + '\n    }\n}'
-                response_user = requests.request("POST", url_user, headers=headers, data=payload_user.encode('UTF-8'))
+                response_user = requests.request("POST", url_user, headers=post_headers, data=payload_user.encode('UTF-8'))
                 print(response_user.text)
                 print('-------------------------------')
             
@@ -372,7 +353,7 @@ class PurchaseView(ListView):
             print('------전체 아이템 구매내역------')
             print(result_list)
             payload_access='{\n    \"m2m:cin\": {\n        \"con\": ' + str(result_list)  + '\n    }\n}'
-            response_access = requests.request("POST", url_access, headers=headers, data=payload_access.encode('UTF-8'))
+            response_access = requests.request("POST", url_access, headers=post_headers, data=payload_access.encode('UTF-8'))
             print(response_access.text)
             print('-------------------------------')
          
@@ -447,12 +428,6 @@ class StudentLogView(ListView):
     def post(self, request, *args, **kwargs):
         receive = request.POST['submit_point']
         url = "http://203.253.128.161:7579/Mobius/AduFarm/havepoint"
-        headers = {
-            'Accept': 'application/json',
-            'X-M2M-RI': '12345',
-            'X-M2M-Origin': '{{aei}}',
-            'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
-            }
             
         if receive == '학생별 포인트 내역 전송':
             students_set = self.get_queryset().exclude(name = 'teacher')
@@ -469,7 +444,7 @@ class StudentLogView(ListView):
                 send_hp = json.dumps(send_hp)
 
                 payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(send_hp)  + '\n    }\n}'
-                response_access = requests.request("POST", url, headers=headers, data=payload.encode('UTF-8'))
+                response_access = requests.request("POST", url, headers=post_headers, data=payload.encode('UTF-8'))
                 print(response_access.text)
 
         return redirect('administrator:student-log')

@@ -24,10 +24,10 @@ header{
 /* 제목 */
 h1{
     position:relative;
-    font-size:55px;
+    font-size:50px;
     color: rgb(0, 0, 0);
     font-weight:500;
-    top:20px;
+    top:70px;
     left:100px; 
     margin-left: auto; 
     margin-right: auto;
@@ -49,7 +49,7 @@ h1{
     width:95px;
     height:95px;
     left:-210px;
-    top:-100px;
+    top:-45px;
     border-bottom:2px;
     z-index:2;
 }
@@ -68,7 +68,7 @@ h1{
     position:relative;
     width:820px;
     height:200px;
-    top:-60px;  
+    top:-30px;  
     /* left:45px; */
     margin-left: auto; 
     margin-right: auto;
@@ -123,7 +123,7 @@ h1{
     width:500px;
     height:500px;
     /* left:270px; */
-    top:-50px;
+    top:-10px;
     z-index:2;
 }
 
@@ -193,10 +193,11 @@ h1{
     position:relative;
     width: 750px;
     height:200px;
-    top:-25px;  
+    top:25px;  
     /* left:230px; */
     margin-left: auto; 
     margin-right: auto;
+    margin-bottom:150px;
     text-align:center;
     border-collapse: collapse;
     border-top: 3px solid rgb(172, 204, 180);
