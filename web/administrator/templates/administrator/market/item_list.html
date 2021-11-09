@@ -21,7 +21,7 @@
         </div>
     
         <div id="top">
-            <img id="topImg" src="{%static 'observation/student.jpg' %}"/>
+            <img id="topImg" src="{%static 'item/box.png' %}"/>
          </div>
     </div> 
 
@@ -30,25 +30,25 @@
     <input id = "post_button" role="button" type="submit" name="submit_btn" value="장터 개시"/><br/>
     <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %} 
-    <input id = "post_button2" role="button" type="submit" name="submit_btn" value="장터 마감"/><br/>
+    <input id = "post_button" role="button" type="submit" name="submit_btn" value="장터 마감"/><br/>
 </form>
 
     <div class="list con">
         <ul class="row">
             <li class="cell">
-                <div class="img-box"><img src="{%static 'observation/student.jpg' %}" alt=""></div>
-                <div class="product-name">자동 물주기 [ 수량: {{item1.count}} ]</div>
+                <div class="img-box"><img src="{%static 'market/watering.png' %}" alt=""></div>
+                <div class="product-name">자동 물 주기 <br>[ 수량: {{item1.count}} ]</div>
                 <div class="product-price">{{item1_price}}</div>
             </li>
             <li class="cell">
-                <div class="img-box"><img src=".{%static 'observation/student.jpg' %}" alt=""></div>
-                <div class="product-name"> 식물 자동 빛 주기 [ 수량: {{item2.count}} ] </div>
+                <div class="img-box"><img src=".{%static 'market/cooler.png' %}" alt=""></div>
+                <div class="product-name">자동 환기모터 작동<br> [ 수량: {{item2.count}} ] </div>
                 <div class="product-price">{{item2_price}}</div>
                 
             </li>
             <li class="cell">
-                <div class="img-box"><img src="{%static 'observation/student.jpg' %}" alt=""></div>
-                <div class="product-name"> 자동 무드등 [ 수량: {{item3.count}} ] </div>
+                <div class="img-box"><img src="{%static 'market/light.png' %}" alt=""></div>
+                <div class="product-name"> 자동 무드등 작동<br> [ 수량: {{item3.count}} ] </div>
                 <div class="product-price">{{item3_price}}</div>
             </li>
         </ul>

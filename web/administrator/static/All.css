@@ -28,7 +28,7 @@ h1{
     color: rgb(0, 0, 0);
     font-weight:500;
     top:70px;
-    left:60px; 
+    left:65px; 
     margin-left: auto; 
     margin-right: auto;
     width:420px;
@@ -170,7 +170,8 @@ h1{
 /* 포인트 리스트, 장터 포스트 버튼 */
 #post_button{
     position:relative;
-    top:-45px;
+    /* top:-45px; */
+    top:-25px;
     /* left:580px;  */
     left:450px; 
     width:370px;
@@ -181,8 +182,8 @@ h1{
 /* 장터 마감 */
 #post_button2{
     position:relative;
-    top:-100px;
-    left:200px; 
+    top:-45px;
+    left:450px; 
     width:370px;
     height:30px;
     font-size:15px;
@@ -236,10 +237,10 @@ h1{
 /* https://yang9808.tistory.com/13 참고 */
 .con {
     position:relative;
-    top:-70px;
+    top:-5px;
     margin-left: auto;
     margin-right: auto;
-    max-width: 800px;
+    max-width:100%;
 }
 
 .cell {
@@ -255,7 +256,10 @@ h1{
 }
 .img-box > img {
     display: block;
-    width: 180px;
+    width: 170px;
+    object-fit: scale-down;
+    padding-top: 10%;
+    padding-bottom: 12%;
 }
 
 li {
@@ -278,9 +282,13 @@ li {
 }
 
 .list > ul > li > .product-name {
+    width : 100%;
     text-align: Center;
     font-weight: bold;
-    background-color: rgb(228, 239, 231);
+    background-size: auto;
+    padding-top: 10%;
+    padding-bottom:10%;
+    background-color: rgb(253, 250, 246);
 }
 .list > ul > li:hover > .product-name {
     text-decoration: underline;
@@ -289,6 +297,9 @@ li {
     text-align: center;
     font-weight: bold;
     font-size: 1.2rem;
+    background-size: auto;
+    padding-top: 3%;
+    padding-bottom: 3%;
     background-color: rgb(228, 239, 231);
 }
 .list > ul > li > .product-price::after {

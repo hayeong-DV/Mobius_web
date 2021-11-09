@@ -214,10 +214,11 @@ class MarketView(ListView):
             for item in item_name_list:
                 market_list =  {
                     "id" : item,
-                    "name" : Item.objects.filter(name=item).first().real_name,
-                    "qty" : Item.objects.filter(name=item).count()
+                    "name" : Item.objects.filter(name=item, student__name='teacher').first().real_name,
+                    "qty" : Item.objects.filter(name=item,student__name='teacher').count()
                 }
                 market_list = json.dumps(market_list)
+                print(market_list)
                 # payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(market_list)  + '\n    }\n}'
                 # response = requests.request("POST", url, headers=post_headers, data= payload.encode('UTF-8'))
 
