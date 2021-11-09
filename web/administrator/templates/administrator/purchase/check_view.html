@@ -36,7 +36,11 @@
     <td>3 / {{item1_count}}</td>
     <td>
         {% for object in item1 %}
+        {% if not item1_count %}
+            <li>None</li>
+        {% else %}
             <li>{{ object.student.name }}</li>
+        {% endif %}
         {% endfor %}
     </td>
 </tr>
@@ -47,7 +51,11 @@
     <td>3 / {{item2_count}}</td>
     <td>
         {% for object in item2 %}
-        <li>{{ object.student.name }}</li>
+        {% if not item2_count %}
+        <li>None</li>
+        {% else %}
+            <li>{{ object.student.name }}</li>
+        {% endif %}
         {% endfor %}
     </td>
 </tr>
@@ -57,7 +65,11 @@
     <td>3 / {{item3_count}}</td>
     <td>
         {% for object in item3 %}
-        <li>{{ object.student.name }}</li>
+        {% if not item2_count %}
+        <li>None</li>
+        {% else %}
+            <li>{{ object.student.name }}</li>
+        {% endif %}
         {% endfor %}
     </td>
 </tr> 

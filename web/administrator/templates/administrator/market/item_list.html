@@ -30,7 +30,7 @@
     <input id = "post_button" role="button" type="submit" name="submit_btn" value="장터 개시"/><br/>
     <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %} 
-    <input id = "post_button" role="button" type="submit" name="submit_btn" value="장터 마감"/><br/>
+    <input id = "post_button2" role="button" type="submit" name="submit_btn" value="장터 마감"/><br/>
 </form>
 
     <div class="list con">
@@ -57,3 +57,18 @@
 
 
 </html>
+
+
+<script>
+    // 장터 개시, 마감, 포인트 전송 버튼
+    var open = document.getElementById('post_button');
+    open.addEventListener('click', function(){
+        alert('장터를 개시하였습니다.');
+    })
+
+    var end = document.getElementById('post_button2');
+    end.addEventListener('click', function(){
+        alert('장터를 마감하였습니다.');
+    })
+
+</script>

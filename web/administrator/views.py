@@ -223,7 +223,7 @@ class MarketView(ListView):
 
             #item가진사람 teacher아닌것들 삭제
             print('####')
-            # Item.objects.filter(student__name = 'teacher').delete()
+            Item.objects.exclude(student__name = 'teacher').delete()
             
 
             return redirect('administrator:market')
