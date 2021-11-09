@@ -30,7 +30,7 @@
 
         <div id="top">
             {% block top %}
-            <img id="topImg" src="{%static 'observation/student.jpg' %}"/>
+            <img id="topImg" src="{%static 'observation/observe2.png' %}"/>
             {% endblock top %}
          </div>
     </div> 
@@ -53,12 +53,14 @@
             {% else %}
                 <tr>
                     <td><a href ="{% url 'administrator:log_detail' object.id %}" >{{ object.name }}</a></td>
-                    <td>{{ object.observe_set.last.receive_date }}</td>
-                    {% if object.observe_set.last.feedback %}
-                        <td>O</td>
-                    {% else %} 
-                        <td>X</td>
-                    {% endif %}
+                    <td> {{ object.observe_set.last.receive_date }} </td>
+
+                    {% if object.check_feedback %}
+                    {% comment %} feedback이라는 필드가 비어있는게 있음 x표시 {% endcomment %}
+                    <td>X</td>
+                    {% else %}
+                    <td>O</td>
+                    {% endif%}
                 </tr>
             {% endif %}
             {% endfor %}

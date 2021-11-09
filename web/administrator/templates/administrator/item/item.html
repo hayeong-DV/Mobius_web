@@ -18,7 +18,7 @@
     
 
 {% block top %}
-    <img id="topImg" src="{%static 'item/item.png' %}"/>
+    <img id="topImg" src="{%static 'item/box2.png' %}"/>
 {% endblock top %}
    
 {% block table %}
@@ -35,7 +35,7 @@
     <tr>
         <td>자동 물 주기</td>
         <td>
-            현재 : {{item1_price}}<br>
+            현재 : {{item1_price}} <br>
              수정 <input type="text" size='4' name='item1_price' style="margin:5px;">
         </td>
         <td>
@@ -65,7 +65,7 @@
             현재 : 3 / {{ item3.count }}<br>
              수정 <input type="text" size='4' name='item3_count'>
         </td>
-    </tr>
+    </tr> 
 </form>
 
 {% endblock data %}

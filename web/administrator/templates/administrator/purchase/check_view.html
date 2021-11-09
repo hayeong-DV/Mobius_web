@@ -29,18 +29,18 @@
 {% endblock table %}
 
 {% block data %}
+
 <tr>
     <td>자동 물 주기</td>
     <td>{{item1_price}}</td>
-    
     <td>3 / {{item1_count}}</td>
-   
     <td>
         {% for object in item1 %}
-        <li>{{ object.student.name }}</li>
+            <li>{{ object.student.name }}</li>
         {% endfor %}
     </td>
 </tr>
+
 <tr>
     <td>자동 환기모터 작동</td>
     <td>{{item2_price}}</td>
@@ -60,5 +60,5 @@
         <li>{{ object.student.name }}</li>
         {% endfor %}
     </td>
-</tr>
+</tr> 
 {% endblock data %}

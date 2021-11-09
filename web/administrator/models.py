@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.db.models import Q
 # Create your models here.
 
 class Student(models.Model):
@@ -10,13 +10,13 @@ class Student(models.Model):
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)
     
+    def check_feedback(self):
+        return self.observe_set.filter(feedback="").exists()
+        # return len(list(filter(lambda x: x == "" ,list(self.observe_set.all().values_list("feedback", flat=True))))) > 0
+     
+
 
 class Observe(models.Model):
-    # STATUS = (
-	# 	('X', '미확인'),
-    #     ('O', '확인'),
-    # )
-
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=False)
     # check = models.CharField(max_length=20, choices= STATUS)
     image = models.ImageField(upload_to = 'images/', blank=True, null=True )
@@ -30,6 +30,8 @@ class Observe(models.Model):
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.student)
 
+    
+
 
 class Item(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) #상품 소유자, 구매자
@@ -40,6 +42,11 @@ class Item(models.Model):
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)
 
+    
+
+        
+
+        
 
 class Point(models.Model):
     name = models.CharField(max_length=20, null=False) # 포인트 지급 이름?

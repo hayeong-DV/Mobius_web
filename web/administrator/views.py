@@ -33,6 +33,9 @@ post_headers = {
     'Content-Type': 'application/vnd.onem2m-res+json; ty=4'
 }
 
+# def get_con():
+# def post_con():
+# 끝나면 시리얼라이저 추가
 
 # Create your views here.
 class HomeView(TemplateView):
@@ -49,21 +52,21 @@ class ObserveLogView(ListView):
         self.object = self.get_queryset()
         self.object_list = self.object
         
-        #학생수 만큼 cin가져오기
+        new_record = []
+        #일단 학생수 만큼 cin가져오고 
         url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
 
         #cin갯수에 따라 response데이터 받는거나중에 추가
+        
         response = requests.request("GET", url, headers=get_headers)
         get_data = json.loads(response.text)
         record = get_data['m2m:cin']['con']
+        # recor = get_data['m2m:cin']
 
-        read_name = record['id']
-        print(read_name)
-
+        read_name = record['id']   
         #####물어볼거
         image = base64.b64decode(record['image'])
         #####
-
         title = record['title']
         text = record['intext']
         water = record['water']
@@ -71,7 +74,7 @@ class ObserveLogView(ListView):
 
         context = self.get_context_data()
        
-       #나중에 받은 리스트만큼만 돌게 하기
+       #나중에 받은 리스트만큼만 돌게 하기()
         for student in self.object:
             #각 학생마다 가진 관찰일지 우선 할당
             # context[student.name]= student.observe_set.all()
@@ -109,9 +112,8 @@ class LogDetailView(DetailView):
         self.object = self.get_object()
         context = self.get_context_data() 
         
-        read_name = self.object.name
         context['observe'] = Observe.objects.filter(
-            student = Student.objects.get(name = read_name)
+            student =  self.object
             )
         return self.render_to_response(context)
 
@@ -119,6 +121,7 @@ class LogDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         #피드백 (저장,전송) 확인상태 변경
         self.object = self.get_object()
+        
         feedback = request.POST['feedback']
         log_id = request.POST['observe__id']
 
@@ -179,8 +182,8 @@ def get_data(context):
             context[item] = Item.objects.filter(name= item, student__name ='teacher')
             context['{}_price'.format(item)] = context[item][0].price
         else:
-            context[item] = Item.objects.filter(name='{}_save'.format(item))
-            context['{}_price'.format(item)] = context[item][0].price
+            context['{}_save'.format(item)] = Item.objects.get(name='{}_save'.format(item))
+            context['{}_price'.format(item)] = context['{}_save'.format(item)].price
         
     return context
 
@@ -215,8 +218,14 @@ class MarketView(ListView):
                     "qty" : Item.objects.filter(name=item).count()
                 }
                 market_list = json.dumps(market_list)
-                payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(market_list)  + '\n    }\n}'
-                response = requests.request("POST", url, headers=post_headers, data= payload.encode('UTF-8'))
+                # payload='{\n    \"m2m:cin\": {\n        \"con\": ' + str(market_list)  + '\n    }\n}'
+                # response = requests.request("POST", url, headers=post_headers, data= payload.encode('UTF-8'))
+
+            #item가진사람 teacher아닌것들 삭제
+            print('####')
+            # Item.objects.filter(student__name = 'teacher').delete()
+            
+
             return redirect('administrator:market')
         else:
             #장터 마감
@@ -399,7 +408,7 @@ class CheckPurchaseView(ListView):
 
         context = self.get_context_data()
         for item in ['item1','item2','item3']:
-            if Item.objects.filter(name=item):
+            if Item.objects.filter(name = item):
                 context[item] = Item.objects.filter(name= item)
                 context['{}_price'.format(item)] = context[item][0].price
                 context['{}_count'.format(item)] = context[item].filter(student__name ='teacher').count()
@@ -407,7 +416,7 @@ class CheckPurchaseView(ListView):
             else:
                 context[item] = Item.objects.filter(name='{}_save'.format(item))
                 context['{}_price'.format(item)] = context[item][0].price
-                context['{}_count'.format(item)] = context[item].filter(student__name ='teacher').count()
+                context['{}_count'.format(item)] = 0
                 
         return self.render_to_response(context) 
 
@@ -461,7 +470,7 @@ class ItemUpdateView(DetailView):
         self.object = self.get_object()
        
         context = self.get_context_data() 
-        context = get_data(context) 
+        context = get_data(context)
         return self.render_to_response(context) 
 
     def post(self, request, *args, **kwargs):
@@ -486,26 +495,21 @@ class ItemUpdateView(DetailView):
             if count != '':
                 old = Item.objects.filter(name=item, student__name = 'teacher').count()
                 new = int(count)
-                print('#########',old,new)
-                
-                if new > old:
+
+                print('old: ',old, 'new: ', new)
+
+                if new > old or old == 0 :
                     for i in range(new - old):
                         Item.objects.create(
                             student = self.object,
                             name = item,
-                            price = Item.objects.filter(name=item)[0].price
+                            price = Item.objects.get(name='{}_save'.format(item)).price,
+                            real_name = Item.objects.get(name='{}_save'.format(item)).real_name
                         )
                 elif new < old:
-                    for i in range(old - new ):
+                    for i in range(old - new):
                         last_obj = Item.objects.filter(name=item).last().delete()
-            
-                elif old == '':
-                    for i in range(new+1):
-                        Item.objects.create(
-                            student = self.object,
-                            name = item,
-                            price = Item.objects.get(name='{}_save'.format(item)).price
-                        )
+
                         
         return redirect('administrator:home')
                 

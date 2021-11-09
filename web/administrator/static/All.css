@@ -28,10 +28,10 @@ h1{
     color: rgb(0, 0, 0);
     font-weight:500;
     top:70px;
-    left:100px; 
+    left:60px; 
     margin-left: auto; 
     margin-right: auto;
-    width:500px;
+    width:390px;
     border-bottom:3px solid rgb(172, 204, 180);
     z-index:0;
 
@@ -49,7 +49,7 @@ h1{
     width:95px;
     height:95px;
     left:-210px;
-    top:-45px;
+    top:-55px;
     border-bottom:2px;
     z-index:2;
 }
@@ -170,8 +170,9 @@ h1{
 /* 포인트 리스트, 장터 포스트 버튼 */
 #post_button{
     position:relative;
-    top:-70px;
-    left:580px; 
+    top:-45px;
+    /* left:580px;  */
+    left:450px; 
     width:370px;
     height:30px;
     font-size:15px;
