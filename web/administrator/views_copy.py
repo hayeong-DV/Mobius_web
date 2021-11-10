@@ -7,7 +7,6 @@ from django.views.generic import(
 # from django.conf import settings
 from django.shortcuts import redirect
 from administrator.models import *
-from datetime import date
 import requests
 import json
 import base64
@@ -26,7 +25,7 @@ get_headers = {
     'X-M2M-RI': '12345',
     'X-M2M-Origin': 'SOrigin'
 }
-of = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+
 post_headers = {
     'Accept': 'application/json',
     'X-M2M-RI': '12345',
@@ -53,50 +52,49 @@ class ObserveLogView(ListView):
         self.object = self.get_queryset()
         self.object_list = self.object
         
-        all_student = self.object.exclude(name='teacher')
-  
+        new_record = []
         #일단 학생수 만큼 cin가져오고 
-        # url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
-        url = "http://203.253.128.161:7579/Mobius/AduFarm/record?fu=2&lim={}&rcn=4".format(all_student.count())
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
 
-        #cin갯수(학생 수)에 따라 response데이터 받기
+        #cin갯수에 따라 response데이터 받는거나중에 추가
+        
         response = requests.request("GET", url, headers=get_headers)
         get_data = json.loads(response.text)
-        cin = get_data["m2m:rsp"]['m2m:cin']
-        
+        record = get_data['m2m:cin']['con']
+        # recor = get_data['m2m:cin']
 
-        record_list = {}
-        for i in range(len(cin)):
-            record = cin[i]["con"]
+        read_name = record['id']   
+        #####물어볼거
+        image = base64.b64decode(record['image'])
+        #####
+        title = record['title']
+        text = record['intext']
+        water = record['water']
+        date = record['date']
 
-            read_date = record['date']
-            user = record["id"]
-           
-            day = datetime.datetime.today().weekday()
-            day = date.today().strftime('%Y년 %m월 %d일 {}'.format(of[day]))
-
-            record_list[user] = {
-                "student": self.object.get(name = user),
-                "image" : ContentFile(
-                            base64.b64decode(record['image']),
-                            user + str(datetime.datetime.now()).split(".")[0] + ".jpg"
-                        ),
-                "title" : record["title"],
-                "content" : record['intext'],
-                "water" : record['water'],
-                "receive_date" : read_date
-            }
-        print(record_list.keys())
         context = self.get_context_data()
        
-        #받은 학생 리스트만큼만 돌아가며 일지 만들기
-        # for student in self.object:
-        for name in record_list:
+       #나중에 받은 리스트만큼만 돌게 하기()
+        for student in self.object:
+            #각 학생마다 가진 관찰일지 우선 할당
+            # context[student.name]= student.observe_set.all()
+            
             #새로운 관찰일지 생성
-            #같은 날짜가 이미 있다면 생성 x
+            #같은 날짜가 있다면 생성 x
             #여기선 아니지만, create할 거 많다면 bulk create
-            if not record_list[name]['student'].observe_set.filter(receive_date = read_date).exists():
-                Observe.objects.create(**record_list[name])
+            if student.name == read_name:
+                if not student.observe_set.filter(receive_date = date).exists():
+                    Observe.objects.create(
+                        student = student,
+                        image = ContentFile(
+                            image,
+                            student.name + str(datetime.datetime.now()).split(".")[0] + ".jpg"
+                        ),
+                        title = title,
+                        content = text,
+                        water = water,
+                        receive_date = date
+                    )
         return self.render_to_response(context)
         
     

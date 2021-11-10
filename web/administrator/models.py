@@ -11,7 +11,7 @@ class Student(models.Model):
         return '[{}] {}'.format(self.id, self.name)
     
     def check_feedback(self):
-        return self.observe_set.filter(feedback="").exists()
+        return self.observe_set.filter(feedback='').exists()
         # return len(list(filter(lambda x: x == "" ,list(self.observe_set.all().values_list("feedback", flat=True))))) > 0
      
 
