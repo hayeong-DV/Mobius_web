@@ -56,18 +56,20 @@ class ObserveLogView(ListView):
         all_student = self.object.exclude(name='teacher')
   
         #일단 학생수 만큼 cin가져오고 
-        # url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
-        url = "http://203.253.128.161:7579/Mobius/AduFarm/record?fu=2&lim={}&rcn=4".format(all_student.count())
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
+        # url = "http://203.253.128.161:7579/Mobius/AduFarm/record?fu=2&lim={}&rcn=4".format(all_student.count())
 
         #cin갯수(학생 수)에 따라 response데이터 받기
         response = requests.request("GET", url, headers=get_headers)
         get_data = json.loads(response.text)
-        cin = get_data["m2m:rsp"]['m2m:cin']
+        cin = get_data['m2m:cin']
+        # cin = get_data["m2m:rsp"]['m2m:cin']
         
-
         record_list = {}
         for i in range(len(cin)):
-            record = cin[i]["con"]
+            print('##1')
+            # record = cin[i]["con"]
+            record = cin["con"]
 
             read_date = record['date']
             user = record["id"]
@@ -84,7 +86,8 @@ class ObserveLogView(ListView):
                 "title" : record["title"],
                 "content" : record['intext'],
                 "water" : record['water'],
-                "receive_date" : read_date
+                "receive_date" : read_date,
+                "feedback": ''
             }
         print(record_list.keys())
         context = self.get_context_data()
@@ -147,9 +150,9 @@ class LogDetailView(DetailView):
         payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + obj.feedback  + '\"\n    }\n}'
         response = requests.request("POST", url, headers=post_headers, data=payload.encode('UTF-8'))
         
-        # print('############')
-        # print(response.text)
-        # print('############')
+        print('############')
+        print(response.text)
+        print('############')
         return redirect('administrator:observation')
 
 
