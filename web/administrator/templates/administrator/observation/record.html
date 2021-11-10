@@ -17,7 +17,8 @@
             <header>
             </header>
             <div id="head">
-            <h1>관찰 일지</h1>
+            <h3>관찰 일지</h3>
+            <h1>Observation log</h1>
         </div>
     
 
@@ -38,10 +39,10 @@
     <table class="plant_table">
         <thead>
             <tr>
-                <th >오늘의 관찰 일지</th>
+                <th >Today's observation record</th>
             </tr>
             <tr>
-                <td>이름 : {{student.name}}</td>
+                <td>Name : {{student.name}}</td>
             </tr>
             <tr>
                 <td>{{object.receive_date}}</td>
@@ -58,7 +59,7 @@
                         {% csrf_token %}
                         <textarea name="feedback" class='feedback'></textarea>
                         <input type="hidden" name="observe__id" value="{{ object.id }}"/>
-                        <input type="submit" role="button" class ="btn" value="완료">
+                        <input type="submit" role="button" class ="btn" value="submit">
                     </form>
                     {% endif %}
                 </td>

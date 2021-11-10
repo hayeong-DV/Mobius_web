@@ -17,7 +17,8 @@
              <header>
             </header>
             <div id="head">
-            <h1>아이템 리스트</h1>
+            <h3>아이템 리스트</h3>
+            <h1>Product list</h1>
         </div>
     
         <div id="top">
@@ -27,28 +28,31 @@
 
     <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <input id = "post_button" role="button" type="submit" name="submit_btn" value="장터 개시"/><br/>
+    <input id = "post_button" role="button" type="submit" name="submit_btn" value="market open"/><br/>
     <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %} 
-    <input id = "post_button" role="button" type="submit" name="submit_btn" value="장터 마감"/><br/>
+    <input id = "post_button" role="button" type="submit" name="submit_btn" value="market close"/><br/>
 </form>
 
     <div class="list con">
         <ul class="row">
             <li class="cell">
                 <div class="img-box"><img src="{%static 'market/watering.png' %}" alt=""></div>
-                <div class="product-name">자동 물 주기 <br>[ 수량: {{item1.count}} ]</div>
+                <div class="product-name">Automatic watering
+                    <br><br>[ count: {{item1.count}} ]</div>
                 <div class="product-price">{{item1_price}}</div>
             </li>
             <li class="cell">
                 <div class="img-box"><img src=".{%static 'market/cooler.png' %}" alt=""></div>
-                <div class="product-name">자동 환기모터 작동<br> [ 수량: {{item2.count}} ] </div>
+                <div class="product-name">Automatic ventilation motor operation
+                    <br> [ count: {{item2.count}} ] </div>
                 <div class="product-price">{{item2_price}}</div>
                 
             </li>
             <li class="cell">
                 <div class="img-box"><img src="{%static 'market/light.png' %}" alt=""></div>
-                <div class="product-name"> 자동 무드등 작동<br> [ 수량: {{item3.count}} ] </div>
+                <div class="product-name"> Automatic mood light operation
+                    <br> [ count: {{item3.count}} ] </div>
                 <div class="product-price">{{item3_price}}</div>
             </li>
         </ul>

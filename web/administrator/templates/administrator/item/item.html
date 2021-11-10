@@ -13,7 +13,8 @@
 {% endblock script %} 
 
 {% block subject %}
-    <h1>상품 관리 리스트</h1>
+    <h3>상품 관리 리스트</h3>
+    <h1>Product management</h1>
 {% endblock subject %}
     
 
@@ -22,10 +23,10 @@
 {% endblock top %}
    
 {% block table %}
-    <th>상품 이름</th>
-    <th>필요 포인트</th>
-    <th>상품 재고</th>
-    <th>저장</th>
+    <th>Product name</th>
+    <th>Point</th>
+    <th>Quantity</th>
+    <th>Update</th>
 {% endblock table %}
 
 
@@ -33,37 +34,37 @@
 <form action="" method="POST" enctype="multipart/form-data" id='form1'>
     {% csrf_token %}
     <tr>
-        <td>자동 물 주기</td>
+        <td>Automatic watering<br>[ 자동 물 주기 ]</td>
         <td>
-            현재 : {{item1_price}} <br>
-             수정 <input type="text" size='4' name='item1_price' style="margin:5px;">
+            Now : {{item1_price}} <br>
+            New <input type="text" size='4' name='item1_price' style="margin:5px;">
         </td>
         <td>
-            현재 : 3 / {{ item1.count }}<br>
-             수정 <input type="text" size='4' name='item1_count'>
+            Now : 3 / {{ item1.count }}<br>
+            New <input type="text" size='4' name='item1_count'>
         </td>
         <td rowspan='3'><input type="submit" role="button" value="수정"></td>
     </tr>
     <tr>
-        <td>자동 환기모터 작동</td>
+        <td>Automatic ventilation motor operation<br>[ 자동 환기모터 작동 ]</td>
         <td>
-            현재 : {{item2_price}}<br>
-             수정 <input type="text" size='4' name='item2_price'>
+            Now : {{item2_price}}<br>
+            New <input type="text" size='4' name='item2_price'>
         </td>
         <td>
-            현재 : 3 / {{ item2.count }}<br>
-             수정 <input type="text" size='4' name='item2_count'>
+            Now : 3 / {{ item2.count }}<br>
+            New <input type="text" size='4' name='item2_count'>
         </td>
     </tr>
     <tr>
-        <td>자동 무드등 작동</td>
+        <td>Automatic mood light operation<br>[ 자동 무드등 동작 ]</td>
         <td>
-            현재 :{{item3_price}}<br>
-             수정 <input type="text" size='4' name='item3_price'>
+            Now :{{item3_price}}<br>
+            New <input type="text" size='4' name='item3_price'>
         </td>
         <td>
-            현재 : 3 / {{ item3.count }}<br>
-             수정 <input type="text" size='4' name='item3_count'>
+            Now : 3 / {{ item3.count }}<br>
+            New <input type="text" size='4' name='item3_count'>
         </td>
     </tr> 
 </form>

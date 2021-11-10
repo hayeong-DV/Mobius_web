@@ -21,20 +21,34 @@ header{
     position: relative;
 }
 
+
 /* 제목 */
 h1{
     position:relative;
-    font-size:45px;
+    font-size:40px;
     color: rgb(0, 0, 0);
     font-weight:500;
     top:70px;
     left:65px; 
     margin-left: auto; 
     margin-right: auto;
-    width:420px;
+    width:430px;
     border-bottom:3px solid rgb(172, 204, 180);
     z-index:0;
 
+}
+
+h3{
+    position:relative;
+    font-size:20px;
+    color: rgb(0, 0, 0);
+    font-weight:500;
+    top:100px;
+    left:70px; 
+    margin-left: auto; 
+    margin-right: auto;
+    width:420px;
+    z-index:0;
 }
 
 #top{
@@ -303,8 +317,16 @@ li {
     background-color: rgb(228, 239, 231);
 }
 .list > ul > li > .product-price::after {
-    content: " 포인트";
+    content: " point";
     font-size: 1rem;
     font-weight:normal;
 }
 
+.feedback{
+    width:820px;
+    height:50px;
+}
+
+.btn{
+    width:820px;
+}

@@ -13,7 +13,8 @@
 {% endblock script %} 
 
 {% block subject %}
-    <h1>학생 포인트 현황</h1>
+    <h3>학생 포인트 현황</h3>
+    <h1>Points of the students</h1>
 {% endblock subject %}
     
 {% block top %}
@@ -24,15 +25,15 @@
 {%block content %}
 <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <input id = "post_button" role="button" type="submit" name="submit_point" value="학생별 포인트 내역 전송"/><br/>
+    <input id = "post_button" role="button" type="submit" name="submit_point" value="Submit student's point"/><br/>
 </form>
 {% endblock %}
    
 
 {% block table %}
-    <th >이름</th>
-    <th >현재 보유 포인트</th>
-    <th >누적 사용 포인트</th>
+    <th >Name</th>
+    <th >currently Points</th>
+    <th >Accumulated usage points</th>
 {% endblock table %}
 
 {% block data %}
