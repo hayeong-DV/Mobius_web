@@ -27,12 +27,13 @@
     </div> 
 
     <form action="" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input id = "post_button" role="button" type="submit" name="submit_btn" value="market open"/><br/>
+        {% csrf_token %}
+        <input id = "post_button" role="button" type="submit" name="submit_btn" value="market open"/><br/>
+    </form>
     <form action="" method="POST" enctype="multipart/form-data">
-    {% csrf_token %} 
-    <input id = "post_button2" role="button" type="submit" name="submit_btn" value="market close"/><br/>
-</form>
+        {% csrf_token %} 
+        <input id = "post_button2" role="button" type="submit" name="submit_btn" value="market close"/><br/>
+    </form>
 
     <div class="list con">
         <ul class="row">

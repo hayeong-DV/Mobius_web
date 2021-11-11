@@ -191,7 +191,7 @@ class PointView(ListView):
         payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + send_content  + '\"\n    }\n}'
 
         response = requests.request("POST", url, headers=post_headers, data=payload.encode('UTF-8'))
-
+        print(response.text)
         return redirect('administrator:point_list')
 
 
@@ -456,10 +456,13 @@ class StudentLogView(ListView):
     model = Student
 
     def post(self, request, *args, **kwargs):
+        print('###########')
         receive = request.POST['submit_point']
+        print(receive)
+
         url = "http://203.253.128.161:7579/Mobius/AduFarm/havepoint"
             
-        if receive == '학생별 포인트 내역 전송':
+        if receive == "Submit student's point":
             students_set = self.get_queryset().exclude(name = 'teacher')
             # 형식
             # name: "studentB"    
