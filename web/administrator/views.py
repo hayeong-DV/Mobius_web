@@ -213,7 +213,7 @@ class MarketView(ListView):
         receive = self.request.POST['submit_btn']
         item_name_list = ['item1','item2','item3']
 
-        if receive == '장터 개시':
+        if receive == 'market open':
         #일단 급하니 그냥 ㄱㄱㄱㄱ 나중에 정리 > 시리얼라이저로
             market_list= {}
             for item in item_name_list:
