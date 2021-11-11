@@ -1,19 +1,17 @@
-from django.urls import path
+from django.urls import path, include
 from administrator import views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 app_name='administrator'
 
 urlpatterns=[
-    # #회원가입
-    # path('register', views.RegisterView.as_view(), name='register'),
-    # #로그인
-    # path('login', views.LoginView.as_view(
-    #                         authenticationPform = LoginForm,
-    #                         template_name = 'administrator/accont/login.html'
-    # ), name='login'),
-
+    #회원가입
+    path('register', views.RegisterView.as_view(), name='register'),
+    #로그인
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='administrator/account/login.html'), name='login'),
+    
     #메인화면 - (일지목록, 포인트 항목, 장터)
     path('', views.HomeView.as_view(), name='home'),
     

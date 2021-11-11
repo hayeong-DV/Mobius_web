@@ -50,10 +50,10 @@ class HomeView(TemplateView):
     template_name = 'administrator/main/main.html'
 
 
-# class RegisterView(CreateView):
-#     template_name = 'administrator/account/register.html'
-#     form_class = ResgisterForm
-#     success_url = reverse_lazy('administrator:home')
+class RegisterView(CreateView):
+    template_name = 'administrator/account/register.html'
+    form_class = ResgisterForm
+    success_url = reverse_lazy('administrator:home')
 
 
 class ObserveLogView(ListView):
@@ -233,7 +233,7 @@ class MarketView(ListView):
             for item in item_name_list:
                 market_list =  {
                     "id" : item,
-                    "name" : Item.objects.filter(name=item, student__name='teacher').first().real_name,
+                    "name" : Item.objects.filter(name='{}_save'.format(item), student__name='teacher').first().real_name,
                     "qty" : Item.objects.filter(name=item,student__name='teacher').count()
                 }
                 market_list = json.dumps(market_list)
