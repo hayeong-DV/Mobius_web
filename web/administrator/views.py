@@ -533,9 +533,30 @@ class ItemUpdateView(DetailView):
 
                         
         return redirect('administrator:home')
-                
 
 
+#_________________________________________________________________________________________________
 
 
- 
+# class PointAPIView(APIView):
+#     #포인트 항목 API
+#     queryset = Point.objects.exclude(student__name = 'teacher')
+#     # queryset = Point.objects.all()
+    
+#     def post(self, request, *args, **kwargs):
+#         print(self.queryset)
+#         #queryset은 dict가 아니라서 safe=False필요 
+#         #safe> 변환할 데이터가 dict인지 확인하는거
+#         send_content = PostPointSerailizer(self.queryset, many=True)
+#         return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
+
+    
+# class StudentLogAPIView(APIView):
+#     #학생별 포인트 현황 목록 API
+#     queryset = Student.objects.exclude(student__name = 'teacher')
+#     def post(self, request, *args, **kwargs):
+#         pass
+#         send_content = StudentPointSerailizer(self.queryset, many=True)
+#         return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
+
+

@@ -9,9 +9,12 @@ app_name='administrator'
 urlpatterns=[
     #회원가입
     path('register', views.RegisterView.as_view(), name='register'),
+
     #로그인
     path('accounts/login/', auth_views.LoginView.as_view(template_name='administrator/account/login.html'), name='login'),
     
+
+
     #메인화면 - (일지목록, 포인트 항목, 장터)
     path('', views.HomeView.as_view(), name='home'),
     
@@ -40,6 +43,8 @@ urlpatterns=[
    
     #학생별 포인트 현황 목록
     path('student-log', views.StudentLogView.as_view(), name='student-log'),
+    # path('api-student-log', views.StudentLogAPIView.as_view(), name='student-log'),
+    
   
     #상품 관리
     path('item-update/<int:pk>', views.ItemUpdateView.as_view(), name='item-update'),
