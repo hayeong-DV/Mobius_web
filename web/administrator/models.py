@@ -42,11 +42,7 @@ class Item(models.Model):
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)
 
-    
-
-        
-
-        
+ 
 
 class Point(models.Model):
     name = models.CharField(max_length=20, null=False) # 포인트 지급 이름?

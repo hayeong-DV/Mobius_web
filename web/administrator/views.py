@@ -3,8 +3,13 @@ from django.views.generic import(
     ListView, DetailView, TemplateView,
     CreateView, UpdateView, DeleteView
 )
+
+from .serializers import *
+from rest_framework.views import APIView
+from rest_framework import status
 # from django.urls import reverse_lazy
 # from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from administrator.models import *
 from datetime import date
@@ -18,6 +23,7 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from django.core.files.base import ContentFile
 from django.db.models import Q
+
 
 
 
@@ -63,32 +69,33 @@ class ObserveLogView(ListView):
         response = requests.request("GET", url, headers=get_headers)
         get_data = json.loads(response.text)
         cin = get_data['m2m:cin']
+        record = cin['con']
         # cin = get_data["m2m:rsp"]['m2m:cin']
         
         record_list = {}
-        for i in range(len(cin)):
-            print('##1')
+        # for i in range(len(cin)):
+          
             # record = cin[i]["con"]
-            record = cin["con"]
+        record = cin["con"]
 
-            read_date = record['date']
-            user = record["id"]
-           
-            day = datetime.datetime.today().weekday()
-            day = date.today().strftime('%Y년 %m월 %d일 {}'.format(of[day]))
+        read_date = record['date']
+        user = record["id"]
+        
+        day = datetime.datetime.today().weekday()
+        day = date.today().strftime('%Y년 %m월 %d일 {}'.format(of[day]))
 
-            record_list[user] = {
-                "student": self.object.get(name = user),
-                "image" : ContentFile(
-                            base64.b64decode(record['image']),
-                            user + str(datetime.datetime.now()).split(".")[0] + ".jpg"
-                        ),
-                "title" : record["title"],
-                "content" : record['intext'],
-                "water" : record['water'],
-                "receive_date" : read_date,
-                "feedback": ''
-            }
+        record_list[user] = {
+            "student": self.object.get(name = user),
+            "image" : ContentFile(
+                        base64.b64decode(record['image']),
+                        user + str(datetime.datetime.now()).split(".")[0] + ".jpg"
+                    ),
+            "title" : record["title"],
+            "content" : record['intext'],
+            "water" : record['water'],
+            "receive_date" : read_date,
+            "feedback": ''
+        }
         print(record_list.keys())
         context = self.get_context_data()
        
@@ -165,6 +172,7 @@ class PointView(ListView):
     def post(self, request, *args, **kwargs):
         point_list={}
         # 또 for.........
+        #그냥 ㄱ 
         for point_obj in self.get_queryset():
             point_list[point_obj.name] = {
                 "action" : point_obj.action,
@@ -523,5 +531,74 @@ class ItemUpdateView(DetailView):
 
         
 
+#_________________________________________________________________________________________________
+
+class PointAPIView(APIView):
+    #포인트 항목 API
+    model = Point
+    def post(self, request, *args, **kwargs):
+
+        #queryset은 dict가 아니라서 safe=False필요 
+        #safe> 변환할 데이터가 dict인지 확인하는거
+        send_content = PostPointSerailizer(self.get_queryset(), many=True)
+        return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
 
 
+
+class ObserveLogAPIView(APIView):
+    #일지목록 API
+    model = Student
+    queryset = Student.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        all_student = self.queryset.exclude(name='teacher')
+  
+        #일단 학생수 만큼 cin가져오고 
+        url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
+        # url = "http://203.253.128.161:7579/Mobius/AduFarm/record?fu=2&lim={}&rcn=4".format(all_student.count())
+
+        #cin갯수(학생 수)에 따라 response데이터 받기
+        response = requests.request("GET", url, headers=get_headers)
+        get_data = json.loads(response.text)
+        cin = get_data['m2m:cin']
+        # cin = get_data["m2m:rsp"]['m2m:cin']
+        
+        record_list = {}
+        for i in range(len(cin)):
+            print('##',i)
+            # record = cin[i]["con"]
+            record = cin["con"]
+
+            read_date = record['date']
+            user = record["id"]
+           
+            day = datetime.datetime.today().weekday()
+            day = date.today().strftime('%Y년 %m월 %d일 {}'.format(of[day]))
+
+            record_list[user] = {
+                "student": self.queryset.get(name = user),
+                "image" : ContentFile(
+                            base64.b64decode(record['image']),
+                            user + str(datetime.datetime.now()).split(".")[0] + ".jpg"
+                        ),
+                "title" : record["title"],
+                "content" : record['intext'],
+                "water" : record['water'],
+                "receive_date" : read_date,
+                "feedback": ''
+            }
+        print(record_list.keys())
+
+        obvserve = ObserveLogSeralizer(record_list, many=True)
+
+        
+       
+        #받은 학생 리스트만큼만 돌아가며 일지 만들기
+        # for student in self.object:
+        # for name in record_list:
+            #새로운 관찰일지 생성
+            #같은 날짜가 이미 있다면 생성 x
+            #여기선 아니지만, create할 거 많다면 bulk create
+            # if not record_list[name]['student'].observe_set.filter(receive_date = read_date).exists():
+            #     Observe.objects.create(**record_list[name])
+        # return 
