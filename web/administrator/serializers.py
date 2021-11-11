@@ -12,8 +12,10 @@ class ObserveLogSeralizer(serializers.ModelSerializer):
         model = Observe
         fields = '__all__'
 
-    def create(self, record_data):
+    def create(self, validated_data):
         print('#####')
-        print(record_data)
+        print(validated_data)
+
+       
 
 

@@ -4,12 +4,11 @@ from django.views.generic import(
     CreateView, UpdateView, DeleteView
 )
 
-from .forms import *
 from .serializers import *
 from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth.models import User
-from django.urls import reverse_lazy
+# from django.urls import reverse_lazy
 # from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -25,6 +24,8 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from django.core.files.base import ContentFile
 from django.db.models import Q
+
+
 
 
 get_headers = {
@@ -48,12 +49,6 @@ post_headers = {
 class HomeView(TemplateView):
     #메인화면- (일지목록, 포인트 항목, 장터) [O]
     template_name = 'administrator/main/main.html'
-
-
-# class RegisterView(CreateView):
-#     template_name = 'administrator/account/register.html'
-#     form_class = ResgisterForm
-#     success_url = reverse_lazy('administrator:home')
 
 
 class ObserveLogView(ListView):
@@ -381,9 +376,8 @@ class PurchaseView(ListView):
             result_list = json.dumps(result_list)
             print('------전체 아이템 구매내역------')
             print(result_list)
-            url_market_access = "http://203.253.128.161:7579/Mobius/AduFarm/market_access"
             payload_access='{\n    \"m2m:cin\": {\n        \"con\": ' + str(result_list)  + '\n    }\n}'
-            response_access = requests.request("POST", url_market_access, headers=post_headers, data=payload_access.encode('UTF-8'))
+            response_access = requests.request("POST", url_access, headers=post_headers, data=payload_access.encode('UTF-8'))
             print(response_access.text)
             print('-------------------------------')
          
@@ -533,9 +527,17 @@ class ItemUpdateView(DetailView):
 
                         
         return redirect('administrator:home')
-                
+                 
+
+#_________________________________________________________________________________________________
 
 
+class PointAPIView(APIView):
+    #포인트 항목 API
+    model = Point
+    def post(self, request, *args, **kwargs):
 
-
- 
+        #queryset은 dict가 아니라서 safe=False필요 
+        #safe> 변환할 데이터가 dict인지 확인하는거
+        send_content = PostPointSerailizer(self.get_queryset(), many=True)
+        return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)

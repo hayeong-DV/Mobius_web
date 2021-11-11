@@ -1,0 +1,17 @@
+<form method="POST" action="">
+    {% csrf_token %}
+    <label for = 'username'>name</label>
+    <input type="text" name="username">
+
+    <label for = 'email'>email</label>
+    <input type="email" name="email">
+
+    <label for = 'password1'>password</label>
+    <input type="text" name="password1">
+
+    <label for = 'password2'>confirm</label>
+    <input type="text" name="password2"> 
+    
+    <input type="submit" value="회원가입">
+    {% comment %} {{ form.as_table}} {% endcomment %}
+</form>

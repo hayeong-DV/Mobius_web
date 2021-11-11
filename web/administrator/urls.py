@@ -6,19 +6,27 @@ from django.conf.urls.static import static
 app_name='administrator'
 
 urlpatterns=[
+    # #회원가입
+    # path('register', views.RegisterView.as_view(), name='register'),
+    # #로그인
+    # path('login', views.LoginView.as_view(
+    #                         authenticationPform = LoginForm,
+    #                         template_name = 'administrator/accont/login.html'
+    # ), name='login'),
+
     #메인화면 - (일지목록, 포인트 항목, 장터)
     path('', views.HomeView.as_view(), name='home'),
     
     #일지목록
     path('observation', views.ObserveLogView.as_view(), name='observation'),
-    path('api-observation', views.ObserveLogAPIView.as_view(), name='api_observation'),
+    # path('api-observation', views.ObserveLogAPIView.as_view(), name='api_observation'),
 
     #일지세부(학생별)
     path('observation/<int:pk>', views.LogDetailView.as_view(), name='log_detail'),
 
     #포인트 항목
     path('point', views.PointView.as_view(), name='point_list'),
-    path('api-point', views.PointAPIView.as_view(), name='api_point_list'),
+    # path('api-point', views.PointAPIView.as_view(), name='api_point_list'),
 
     #장터
     path('market', views.MarketView.as_view(), name='market'),
