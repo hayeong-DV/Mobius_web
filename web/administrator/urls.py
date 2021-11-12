@@ -13,7 +13,14 @@ urlpatterns=[
     #로그인
     path('accounts/login/', auth_views.LoginView.as_view(template_name='administrator/account/login.html'), name='login'),
     
+    #관리자별-학생목록
+    path('student-list', views.StudentListView.as_view(), name='student_list' ),
 
+    #관리자별-학생 추가
+    path('student-list/add', views.StudentAddView.as_view(), name='student_add' ),
+
+    #관리자별-학생-업데이트, 삭제
+    path('student-list/<int:pk>/detail', views.StudentDetailView.as_view(), name='student_detail' ),
 
     #메인화면 - (일지목록, 포인트 항목, 장터)
     path('', views.HomeView.as_view(), name='home'),

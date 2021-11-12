@@ -3,10 +3,19 @@ from django.views.generic import(
     ListView, DetailView, TemplateView,
     CreateView, UpdateView, DeleteView
 )
-# from django.urls import reverse_lazy
+
+from .forms import *
+from .serializers import *
+from rest_framework.views import APIView
+from rest_framework import status
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
+from django.urls import reverse_lazy
 # from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from administrator.models import *
+from datetime import date
 import requests
 import json
 import base64
@@ -19,13 +28,12 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 
 
-
 get_headers = {
     'Accept': 'application/json',
     'X-M2M-RI': '12345',
     'X-M2M-Origin': 'SOrigin'
 }
-
+of = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
 post_headers = {
     'Accept': 'application/json',
     'X-M2M-RI': '12345',
@@ -43,6 +51,12 @@ class HomeView(TemplateView):
     template_name = 'administrator/main/main.html'
 
 
+class RegisterView(CreateView):
+    template_name = 'administrator/account/register.html'
+    form_class = ResgisterForm
+    success_url = reverse_lazy('administrator:home')
+
+
 class ObserveLogView(ListView):
     #일지목록 [O]
     template_name = 'administrator/observation/student.html'
@@ -52,49 +66,54 @@ class ObserveLogView(ListView):
         self.object = self.get_queryset()
         self.object_list = self.object
         
-        new_record = []
+        all_student = self.object.exclude(name='teacher')
+  
         #일단 학생수 만큼 cin가져오고 
         url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
+        # url = "http://203.253.128.161:7579/Mobius/AduFarm/record?fu=2&lim={}&rcn=4".format(all_student.count())
 
-        #cin갯수에 따라 response데이터 받는거나중에 추가
-        
+        #cin갯수(학생 수)에 따라 response데이터 받기
         response = requests.request("GET", url, headers=get_headers)
         get_data = json.loads(response.text)
-        record = get_data['m2m:cin']['con']
-        # recor = get_data['m2m:cin']
+        cin = get_data['m2m:cin']
+        record = cin['con']
+        # cin = get_data["m2m:rsp"]['m2m:cin']
+        
+        record_list = {}
+        # for i in range(len(cin)):
+          
+            # record = cin[i]["con"]
+        record = cin["con"]
 
-        read_name = record['id']   
-        #####물어볼거
-        image = base64.b64decode(record['image'])
-        #####
-        title = record['title']
-        text = record['intext']
-        water = record['water']
-        date = record['date']
+        read_date = record['date']
+        user = record["id"]
+        
+        day = datetime.datetime.today().weekday()
+        day = date.today().strftime('%Y년 %m월 %d일 {}'.format(of[day]))
 
+        record_list[user] = {
+            "student": self.object.get(name = user),
+            "image" : ContentFile(
+                        base64.b64decode(record['image']),
+                        user + str(datetime.datetime.now()).split(".")[0] + ".jpg"
+                    ),
+            "title" : record["title"],
+            "content" : record['intext'],
+            "water" : record['water'],
+            "receive_date" : read_date,
+            "feedback": ''
+        }
+        print(record_list.keys())
         context = self.get_context_data()
        
-       #나중에 받은 리스트만큼만 돌게 하기()
-        for student in self.object:
-            #각 학생마다 가진 관찰일지 우선 할당
-            # context[student.name]= student.observe_set.all()
-            
+        #받은 학생 리스트만큼만 돌아가며 일지 만들기
+        # for student in self.object:
+        for name in record_list:
             #새로운 관찰일지 생성
-            #같은 날짜가 있다면 생성 x
+            #같은 날짜가 이미 있다면 생성 x
             #여기선 아니지만, create할 거 많다면 bulk create
-            if student.name == read_name:
-                if not student.observe_set.filter(receive_date = date).exists():
-                    Observe.objects.create(
-                        student = student,
-                        image = ContentFile(
-                            image,
-                            student.name + str(datetime.datetime.now()).split(".")[0] + ".jpg"
-                        ),
-                        title = title,
-                        content = text,
-                        water = water,
-                        receive_date = date
-                    )
+            if not record_list[name]['student'].observe_set.filter(receive_date = read_date).exists():
+                Observe.objects.create(**record_list[name])
         return self.render_to_response(context)
         
     
@@ -145,9 +164,9 @@ class LogDetailView(DetailView):
         payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + obj.feedback  + '\"\n    }\n}'
         response = requests.request("POST", url, headers=post_headers, data=payload.encode('UTF-8'))
         
-        # print('############')
-        # print(response.text)
-        # print('############')
+        print('############')
+        print(response.text)
+        print('############')
         return redirect('administrator:observation')
 
 
@@ -160,6 +179,7 @@ class PointView(ListView):
     def post(self, request, *args, **kwargs):
         point_list={}
         # 또 for.........
+        #그냥 ㄱ 
         for point_obj in self.get_queryset():
             point_list[point_obj.name] = {
                 "action" : point_obj.action,
@@ -172,7 +192,7 @@ class PointView(ListView):
         payload='{\n    \"m2m:cin\": {\n        \"con\": \"' + send_content  + '\"\n    }\n}'
 
         response = requests.request("POST", url, headers=post_headers, data=payload.encode('UTF-8'))
-
+        print(response.text)
         return redirect('administrator:point_list')
 
 
@@ -208,13 +228,13 @@ class MarketView(ListView):
         receive = self.request.POST['submit_btn']
         item_name_list = ['item1','item2','item3']
 
-        if receive == '장터 개시':
+        if receive == 'market open':
         #일단 급하니 그냥 ㄱㄱㄱㄱ 나중에 정리 > 시리얼라이저로
             market_list= {}
             for item in item_name_list:
                 market_list =  {
                     "id" : item,
-                    "name" : Item.objects.filter(name=item, student__name='teacher').first().real_name,
+                    "name" : Item.objects.filter(name='{}_save'.format(item), student__name='teacher').first().real_name,
                     "qty" : Item.objects.filter(name=item,student__name='teacher').count()
                 }
                 market_list = json.dumps(market_list)
@@ -362,8 +382,9 @@ class PurchaseView(ListView):
             result_list = json.dumps(result_list)
             print('------전체 아이템 구매내역------')
             print(result_list)
+            url_market_access = "http://203.253.128.161:7579/Mobius/AduFarm/market_access"
             payload_access='{\n    \"m2m:cin\": {\n        \"con\": ' + str(result_list)  + '\n    }\n}'
-            response_access = requests.request("POST", url_access, headers=post_headers, data=payload_access.encode('UTF-8'))
+            response_access = requests.request("POST", url_market_access, headers=post_headers, data=payload_access.encode('UTF-8'))
             print(response_access.text)
             print('-------------------------------')
          
@@ -436,10 +457,13 @@ class StudentLogView(ListView):
     model = Student
 
     def post(self, request, *args, **kwargs):
+        print('###########')
         receive = request.POST['submit_point']
+        print(receive)
+
         url = "http://203.253.128.161:7579/Mobius/AduFarm/havepoint"
             
-        if receive == '학생별 포인트 내역 전송':
+        if receive == "Submit student's point":
             students_set = self.get_queryset().exclude(name = 'teacher')
             # 형식
             # name: "studentB"    
@@ -464,23 +488,26 @@ class StudentLogView(ListView):
 class ItemUpdateView(DetailView):
     #상품 관리 [O]
     template_name = 'administrator/item/item.html'
+    # model = Student
     model = Student
     fields=['name','price']
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        print('####')
+        print(self.object)
        
         context = self.get_context_data() 
         context = get_data(context)
         return self.render_to_response(context) 
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        update_list={}
-        
+        self.object = self.get_object()      
         #새 포인트 가격 저장, 수량 만큼 객체 생성,삭제
         
         #post된 것들 가져오기
+        
+
         for item in ['item1', 'item2','item3']:
             data = {
                 'price' : self.request.POST.get('{}_price'.format(item), ''),
@@ -513,10 +540,30 @@ class ItemUpdateView(DetailView):
 
                         
         return redirect('administrator:home')
-                
 
 
-        
+#_________________________________________________________________________________________________
 
+
+# class PointAPIView(APIView):
+#     #포인트 항목 API
+#     queryset = Point.objects.exclude(student__name = 'teacher')
+#     # queryset = Point.objects.all()
+    
+#     def post(self, request, *args, **kwargs):
+#         print(self.queryset)
+#         #queryset은 dict가 아니라서 safe=False필요 
+#         #safe> 변환할 데이터가 dict인지 확인하는거
+#         send_content = PostPointSerailizer(self.queryset, many=True)
+#         return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
+
+    
+# class StudentLogAPIView(APIView):
+#     #학생별 포인트 현황 목록 API
+#     queryset = Student.objects.exclude(student__name = 'teacher')
+#     def post(self, request, *args, **kwargs):
+#         pass
+#         send_content = StudentPointSerailizer(self.queryset, many=True)
+#         return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
 
 

@@ -4,22 +4,15 @@ from django.db.models import Q
 # Create your models here.
 
 class Student(models.Model):
-    teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    name = models.CharField(max_length=10, null=True)
-    email = models.EmailField(max_length=100, null = True)
-    phone = models.CharField(max_length=20, null=True)
+    name = models.CharField(max_length=20, null=False)
     point =  models.IntegerField( null=True, blank=True)
     point_used = models.IntegerField(default=0, blank=True, null=True)
 
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)
-
-    # def set_teacher(self):
-    #     self.objects.update(teacher = self.request.user)
-    #     self.objects.save()
     
-    # def check_feedback(self):
-    #     return self.observe_set.filter(feedback="").exists()
+    def check_feedback(self):
+        return self.observe_set.filter(feedback="").exists()
         # return len(list(filter(lambda x: x == "" ,list(self.observe_set.all().values_list("feedback", flat=True))))) > 0
      
 

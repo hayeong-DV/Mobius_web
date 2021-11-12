@@ -1,0 +1,19 @@
+<form method="POST" action=" ">
+    {% csrf_token %}
+    {% if messages %}
+        {% for message in messages %}
+            {{ message.message }}
+        {% endfor %}
+    {% endif %}
+    <label for = 'name'>Student name</label>
+    <input type="text" name="name">
+
+    <label for = 'email'>Email:</label>
+    <input type="email" name="email">
+
+    <label for = 'phone'>Phone:</label>
+    <input type="text" name="phone">
+
+    <input type="submit" value="추가">
+    {% comment %} {{ form.as_table}} {% endcomment %}
+</form>

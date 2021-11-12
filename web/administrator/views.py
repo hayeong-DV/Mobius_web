@@ -1,18 +1,21 @@
 from django.shortcuts import render
+from django.urls.base import reverse
 from django.views.generic import(
     ListView, DetailView, TemplateView,
     CreateView, UpdateView, DeleteView
 )
 
-from .forms import *
+from .forms import StudentForm, ResgisterForm
 from .serializers import *
 from rest_framework.views import APIView
 from rest_framework import status
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 # from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.contrib import messages
 from administrator.models import *
 from datetime import date
 import requests
@@ -54,6 +57,81 @@ class RegisterView(CreateView):
     template_name = 'administrator/account/register.html'
     form_class = ResgisterForm
     success_url = reverse_lazy('administrator:home')
+
+
+class StudentListView(LoginRequiredMixin, ListView):
+    login_url = 'administrator:login'
+    template_name = 'administrator/account/student_list.html'
+    # model = Student
+
+    def get_queryset(self):
+        return Student.objects.filter(teacher = self.request.user)
+
+
+class StudentAddView(LoginRequiredMixin, CreateView):
+    login_url = 'administrator:login'
+    template_name = 'administrator/account/student_create.html'
+    model = User
+    form_class= StudentForm
+    # success_url =  reverse_lazy('administrator:student_list') 
+
+    def post(self, request, *args, **kwargs):
+        form = StudentForm(self.request.POST, initial={'teacher': self.request.user })
+        if form.is_valid():
+           print(form.cleaned_data)
+
+        # if Student.objects.filter(name = form.cleaned_data['name']):
+        #     messages.error(self.request, '이미 입력된 학생입니다.', extra_tags='danger')
+        #     return self.render_to_response(self.get_context_data(form=form))
+        # else:
+        #     print(form.cleaned_data['teacher'])
+            # print('#####')
+            # form = StudentForm(self.request.POST, initial={'teacher': self.request.user })
+            # form.save()
+            # print('#####')
+            # print(form.cleaned_data)
+            # Student.objects.create(
+            #     #얘하나 추가할려고....이래야하나..
+            #     teacher = self.request.user, 
+            #     name = form.cleaned_data['name'],
+            #     email = form.cleaned_data['email'],
+            #     phone = form.cleaned_data['phone']
+            # )
+        # return redirect('administrator:student_list')
+
+
+class StudentDetailView(LoginRequiredMixin, DetailView):
+    login_url = 'administrator:login'
+    template_name = 'administrator/account/student_detail.html'
+    model = Student
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.POST.get('method') == 'delete':
+            self.object.delete()
+            return redirect('administrator:student_list')
+        else:
+            print('####')
+            print(request.POST)
+
+            form = StudentForm(request.POST)
+            if form.is_valid():
+                print('###')
+                print(form.changed_data)
+            # if form
+            
+            
+
+
+
+
+
+
+
+    
+
+
+
 
 
 class ObserveLogView(ListView):
@@ -487,23 +565,26 @@ class StudentLogView(ListView):
 class ItemUpdateView(DetailView):
     #상품 관리 [O]
     template_name = 'administrator/item/item.html'
+    # model = Student
     model = Student
     fields=['name','price']
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        print('####')
+        print(self.object)
        
         context = self.get_context_data() 
         context = get_data(context)
         return self.render_to_response(context) 
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        update_list={}
-        
+        self.object = self.get_object()      
         #새 포인트 가격 저장, 수량 만큼 객체 생성,삭제
         
         #post된 것들 가져오기
+        
+
         for item in ['item1', 'item2','item3']:
             data = {
                 'price' : self.request.POST.get('{}_price'.format(item), ''),

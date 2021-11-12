@@ -1,0 +1,21 @@
+<h1>Detail/수정/삭제</h1>
+
+
+<form action='' method='POST'>
+{% csrf_token %}
+    <label for = 'name'>Student name</label>
+    <input type="text" name="name" value="{{object.name}}"><br>
+
+    <label for = 'email'>Student email</label>
+    <input type="text" name="email" value="{{object.email}}"><br>
+
+    <label for = 'phone'>Student phone</label>
+    <input type="text" name="phone" value="{{object.phone}}"><br>
+    <input type="submit" value="수정">
+</form> 
+
+<form action="" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="method" value="delete"/>
+        <button type="submit" >삭제</button>
+</form>

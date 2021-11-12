@@ -18,4 +18,16 @@ class ResgisterForm(UserCreationForm):
         if commit:
             user.save()
         return user
-    
+
+
+
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields=('name','email','phone')
+
+
+
+
+
+
