@@ -18,11 +18,10 @@ class Student(models.Model):
     #     self.objects.update(teacher = self.request.user)
     #     self.objects.save()
     
-    # def check_feedback(self):
-    #     return self.observe_set.filter(feedback="").exists()
+    def check_feedback(self):
+        return self.observe_set.filter(feedback="").exists()
         # return len(list(filter(lambda x: x == "" ,list(self.observe_set.all().values_list("feedback", flat=True))))) > 0
      
-
 
 class Observe(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=False)
@@ -39,7 +38,8 @@ class Observe(models.Model):
         return '[{}] {}'.format(self.id, self.student)
 
     
-
+#선생님이 item들 가지고 있다가 student에게 나중에 주는거 하고싶은데
+#그럼 어떻게 해야하지
 
 class Item(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) #상품 소유자, 구매자

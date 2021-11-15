@@ -7,11 +7,19 @@ from django.contrib.auth import views as auth_views
 app_name='administrator'
 
 urlpatterns=[
+    #메인화면 - (일지목록, 포인트 항목, 장터)
+    path('', views.HomeView.as_view(), name='home'),
+
     #회원가입
     path('register', views.RegisterView.as_view(), name='register'),
+    #회원가입 API
+    path('api-register', views.RegisterAPIView.as_view(), name='register'),
 
     #로그인
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='administrator/account/login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='administrator/account/login.html'), name='login'),
+
+    #로그아웃
+    path('logout/', auth_views.LogoutView.as_view(next_page = 'administrator:home'), name='logout'),
     
     #관리자별-학생목록
     path('student-list', views.StudentListView.as_view(), name='student_list' ),
@@ -22,12 +30,10 @@ urlpatterns=[
     #관리자별-학생-업데이트, 삭제
     path('student-list/<int:pk>/detail', views.StudentDetailView.as_view(), name='student_detail' ),
 
-    #메인화면 - (일지목록, 포인트 항목, 장터)
-    path('', views.HomeView.as_view(), name='home'),
     
     #일지목록
     path('observation', views.ObserveLogView.as_view(), name='observation'),
-    # path('api-observation', views.ObserveLogAPIView.as_view(), name='api_observation'),
+    # path('api-observation', vie∂s.ObserveLogAPIView.as_view(), name='api_observation'),
 
     #일지세부(학생별)
     path('observation/<int:pk>', views.LogDetailView.as_view(), name='log_detail'),

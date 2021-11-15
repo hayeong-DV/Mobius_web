@@ -1,3 +1,4 @@
+{% load widget_tweaks %}
 <form method="POST" action=" ">
     {% csrf_token %}
     {% if messages %}
@@ -5,14 +6,17 @@
             {{ message.message }}
         {% endfor %}
     {% endif %}
+    {% comment %} <label for = 'teacher'>Teacher</label>
+    <input type="text" name="teacher" value={{request.user}}> {% endcomment %}
+    {% comment %} {{form.teacher.as_hidden}} {% endcomment %}
     <label for = 'name'>Student name</label>
-    <input type="text" name="name">
+    {{form.name}}
 
     <label for = 'email'>Email:</label>
-    <input type="email" name="email">
+    {{form.email}}
 
     <label for = 'phone'>Phone:</label>
-    <input type="text" name="phone">
+    {{form.phone}}
 
     <input type="submit" value="추가">
     {% comment %} {{ form.as_table}} {% endcomment %}

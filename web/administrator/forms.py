@@ -24,7 +24,11 @@ class ResgisterForm(UserCreationForm):
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
-        fields=('name','email','phone')
+        fields = '__all__'
+        exclude = ('teacher',)
+        
+            
+             
 
 
 

@@ -7,12 +7,13 @@ from django.views.generic import(
 
 from .forms import StudentForm, ResgisterForm
 from .serializers import *
+
 from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
-# from django.conf import settings
+
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -59,8 +60,30 @@ class RegisterView(CreateView):
     success_url = reverse_lazy('administrator:home')
 
 
+class RegisterAPIView(APIView):
+    serializer_class = CreateUserSerializer
+
+    def post(self, request, *args, **kwargs):
+        register_serializer = CreateUserSerializer(data = self.request.data)
+        print('########')
+        print(register_serializer)
+
+        if register_serializer.is_valid():
+            # 왜 안들ㅇ어ㅗ아 ㅇㄹㄴㅇㄹㅁㅇㄹㅁㅇ
+            print('####22')
+            new_user = register_serializer.save()
+            return JsonResponse( new_user.data, status = status.HTTP_201_CREATED ) 
+        return JsonResponse({'message': 'not valid'}, status = status.HTTP_400_BAD_REQUEST )
+
+
+
+
+
+
+
+
 class StudentListView(LoginRequiredMixin, ListView):
-    login_url = 'administrator:login'
+    login_url = 'login/'
     template_name = 'administrator/account/student_list.html'
     # model = Student
 
@@ -69,39 +92,44 @@ class StudentListView(LoginRequiredMixin, ListView):
 
 
 class StudentAddView(LoginRequiredMixin, CreateView):
-    login_url = 'administrator:login'
+    login_url = 'login/'
     template_name = 'administrator/account/student_create.html'
     model = User
     form_class= StudentForm
-    # success_url =  reverse_lazy('administrator:student_list') 
+    success_url =  reverse_lazy('administrator:student_list') 
+    #방법 1
+    # def get_form_kwargs(self):
+    #     kwargs = super().get_form_kwargs()
+    #     kwargs.update({
+    #         "initial":{
+    #             'teacher': self.request.user}
+    #     })
+    #     return kwargs
+    # def post(self, request, *args, **kwargs):
 
-    def post(self, request, *args, **kwargs):
-        form = StudentForm(self.request.POST, initial={'teacher': self.request.user })
-        if form.is_valid():
-           print(form.cleaned_data)
-
-        # if Student.objects.filter(name = form.cleaned_data['name']):
-        #     messages.error(self.request, '이미 입력된 학생입니다.', extra_tags='danger')
-        #     return self.render_to_response(self.get_context_data(form=form))
-        # else:
-        #     print(form.cleaned_data['teacher'])
-            # print('#####')
-            # form = StudentForm(self.request.POST, initial={'teacher': self.request.user })
-            # form.save()
-            # print('#####')
-            # print(form.cleaned_data)
-            # Student.objects.create(
+    #방법2
+    def form_valid(self, form):
+        if Student.objects.filter(name = form.cleaned_data['name']):
+            messages.error(self.request, '이미 입력된 학생입니다.', extra_tags='danger')
+            return self.render_to_response(self.get_context_data(form=form))
+        else:
+            self.object = form.save(commit=False)
+            self.object.teacher = self.request.user
+            self.object.save()
+            return super().form_valid(form)
+           
+            # 해결 전 create
             #     #얘하나 추가할려고....이래야하나..
             #     teacher = self.request.user, 
             #     name = form.cleaned_data['name'],
             #     email = form.cleaned_data['email'],
             #     phone = form.cleaned_data['phone']
             # )
-        # return redirect('administrator:student_list')
+            # return redirect('administrator:student_list')
 
 
 class StudentDetailView(LoginRequiredMixin, DetailView):
-    login_url = 'administrator:login'
+    login_url = 'login/'
     template_name = 'administrator/account/student_detail.html'
     model = Student
 
@@ -111,31 +139,15 @@ class StudentDetailView(LoginRequiredMixin, DetailView):
             self.object.delete()
             return redirect('administrator:student_list')
         else:
-            print('####')
-            print(request.POST)
-
-            form = StudentForm(request.POST)
+            form = StudentForm(request.POST, instance = self.object)
             if form.is_valid():
-                print('###')
-                print(form.changed_data)
-            # if form
-            
+                form.save()
+                return redirect('administrator:student_list')
             
 
-
-
-
-
-
-
-    
-
-
-
-
-
-class ObserveLogView(ListView):
+class ObserveLogView(LoginRequiredMixin, ListView):
     #일지목록 [O]
+    login_url = 'login/'
     template_name = 'administrator/observation/student.html'
     model = Student
 
@@ -149,25 +161,21 @@ class ObserveLogView(ListView):
         url = "http://203.253.128.161:7579/Mobius/AduFarm/record/la"
         # url = "http://203.253.128.161:7579/Mobius/AduFarm/record?fu=2&lim={}&rcn=4".format(all_student.count())
 
-        #cin갯수(학생 수)에 따라 response데이터 받기
+        #cin갯수(학생 수)에 따라 response데이터 받기-일단 la로 하나만
         response = requests.request("GET", url, headers=get_headers)
         get_data = json.loads(response.text)
         cin = get_data['m2m:cin']
         record = cin['con']
-        # cin = get_data["m2m:rsp"]['m2m:cin']
+        #여러개 가져올때
+        #cin = get_data["m2m:rsp"]['m2m:cin']
+        #for i in range(len(cin)): 
+            # record = cin[i]["con"]
         
         record_list = {}
-        # for i in range(len(cin)):
-          
-            # record = cin[i]["con"]
         record = cin["con"]
-
         read_date = record['date']
         user = record["id"]
-        
-        day = datetime.datetime.today().weekday()
-        day = date.today().strftime('%Y년 %m월 %d일 {}'.format(of[day]))
-
+    
         record_list[user] = {
             "student": self.object.get(name = user),
             "image" : ContentFile(
@@ -180,9 +188,6 @@ class ObserveLogView(ListView):
             "receive_date" : read_date,
             "feedback": ''
         }
-        print(record_list.keys())
-        context = self.get_context_data()
-       
         #받은 학생 리스트만큼만 돌아가며 일지 만들기
         # for student in self.object:
         for name in record_list:
@@ -191,18 +196,18 @@ class ObserveLogView(ListView):
             #여기선 아니지만, create할 거 많다면 bulk create
             if not record_list[name]['student'].observe_set.filter(receive_date = read_date).exists():
                 Observe.objects.create(**record_list[name])
+
+        context = self.get_context_data()
         return self.render_to_response(context)
         
     
 
-class LogDetailView(DetailView):
+class LogDetailView(LoginRequiredMixin, DetailView):
     #일지세부(학생별) 
+    login_url = 'login/'
     template_name = 'administrator/observation/record.html'
     model = Student
  
-    # def get_success_url(self):
-    #     return reverse_lazy('administrator:log_detail', kwargs={"pk":self.kwargs['pk']})
-
     def get(self, request, *args, **kwargs):
         #pk로 특정 학생 로드
         self.object = self.get_object()
@@ -247,8 +252,9 @@ class LogDetailView(DetailView):
         return redirect('administrator:observation')
 
 
-class PointView(ListView):
+class PointView(LoginRequiredMixin, ListView):
     #포인트 항목 [O]
+    login_url = 'login/'
     template_name = 'administrator/point/point_list.html'
     model = Point
 
@@ -286,8 +292,9 @@ def get_data(context):
 
 
 
-class MarketView(ListView):
+class MarketView(LoginRequiredMixin, ListView):
     #장터
+    login_url = 'login/'
     template_name = 'administrator/market/item_list.html'
     model = Item
 
@@ -331,8 +338,9 @@ class MarketView(ListView):
             return redirect('administrator:purchase')
         
 
-class PurchaseView(ListView):
+class PurchaseView(LoginRequiredMixin, ListView):
     #상품구매현황_계산용 [O]
+    login_url = 'login/'
     template_name = 'administrator/purchase/check.html'
     model = Item
  
@@ -499,6 +507,7 @@ class PurchaseView(ListView):
 
 class CheckPurchaseView(ListView):
     #상품구매현황_확인용 [O]
+    login_url = 'login/'
     template_name = 'administrator/purchase/check_view.html'
     model = Item
 
@@ -523,13 +532,15 @@ class CheckPurchaseView(ListView):
 
 
 
-class RequirementView(ListView):
+class RequirementView(LoginRequiredMixin, ListView):
     #요구사항 페이지 [O]
+    login_url = 'login/'
     template_name = 'administrator/requirement/request.html'
     model = Requirements
 
-class StudentLogView(ListView):
+class StudentLogView(LoginRequiredMixin, ListView):
     #학생별 포인트 현황 목록 [O]
+    login_url = 'login/'
     template_name = 'administrator/student/point.html'
     model = Student
 
@@ -561,9 +572,9 @@ class StudentLogView(ListView):
         return redirect('administrator:student-log')
 
 
-
-class ItemUpdateView(DetailView):
+class ItemUpdateView(LoginRequiredMixin, DetailView):
     #상품 관리 [O]
+    login_url = 'login/'
     template_name = 'administrator/item/item.html'
     # model = Student
     model = Student
