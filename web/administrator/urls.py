@@ -3,6 +3,15 @@ from administrator import views
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+# from rest_framework.authtoken import rest_auth_views
+
+# from rest_framework_jwt.views import obtain_jwt_token
+# from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 
 app_name='administrator'
 
@@ -13,10 +22,17 @@ urlpatterns=[
     #회원가입
     path('register', views.RegisterView.as_view(), name='register'),
     #회원가입 API
-    path('api-register', views.RegisterAPIView.as_view(), name='register'),
+    path('api/register', views.RegisterAPIView.as_view(), name='api_register'),
 
     #로그인
     path('login/', auth_views.LoginView.as_view(template_name='administrator/account/login.html'), name='login'),
+    #로그인 API
+    path("api/token", TokenObtainPairView.as_view()),  # 토큰 발급
+    # path("api/refresh", TokenRefreshView.as_view()),  # 토큰 재발급
+    
+    path('api/login', views.LoginAPIView.as_view(), name='api_login' ),
+   
+
 
     #로그아웃
     path('logout/', auth_views.LogoutView.as_view(next_page = 'administrator:home'), name='logout'),

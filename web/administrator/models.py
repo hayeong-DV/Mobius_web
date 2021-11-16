@@ -39,16 +39,18 @@ class Observe(models.Model):
 
     
 #선생님이 item들 가지고 있다가 student에게 나중에 주는거 하고싶은데
-#그럼 어떻게 해야하지
-
+#그럼 어떻게 해야하지 - null을 그냥 선생님으로 나타내게 하여라! -근데 여기서 request.user어케하지
 class Item(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) #상품 소유자, 구매자
+    # blank=''면 선생님인걸로
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #상품 소유자, 구매자
     name = models.CharField(max_length=20, null=False) #상품이름
     real_name =  models.CharField(max_length=100, null=False) 
     price = models.IntegerField( null=False ) #필요포인트
 
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)
+
+
 
     # def check_item_type(self):
     #     print('###')

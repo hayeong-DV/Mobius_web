@@ -4,12 +4,15 @@ from django.views.generic import(
     ListView, DetailView, TemplateView,
     CreateView, UpdateView, DeleteView
 )
+from django.contrib.auth import authenticate, login
 
 from .forms import StudentForm, ResgisterForm
 from .serializers import *
 
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework import permissions
+from rest_framework.authtoken.models import Token
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
@@ -36,7 +39,7 @@ get_headers = {
     'X-M2M-RI': '12345',
     'X-M2M-Origin': 'SOrigin'
 }
-of = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+
 post_headers = {
     'Accept': 'application/json',
     'X-M2M-RI': '12345',
@@ -53,29 +56,45 @@ class HomeView(TemplateView):
     #메인화면- (일지목록, 포인트 항목, 장터) [O]
     template_name = 'administrator/main/main.html'
 
-
+#회원가입
 class RegisterView(CreateView):
+    permission_classes = (permissions.AllowAny,)
+
     template_name = 'administrator/account/register.html'
     form_class = ResgisterForm
     success_url = reverse_lazy('administrator:home')
 
 
 class RegisterAPIView(APIView):
-    serializer_class = CreateUserSerializer
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
-        register_serializer = CreateUserSerializer(data = self.request.data)
-        print('########')
-        print(register_serializer)
+        register_serializer = RegisterSerializer(data = self.request.data)
 
         if register_serializer.is_valid():
-            # 왜 안들ㅇ어ㅗ아 ㅇㄹㄴㅇㄹㅁㅇㄹㅁㅇ
-            print('####22')
-            new_user = register_serializer.save()
-            return JsonResponse( new_user.data, status = status.HTTP_201_CREATED ) 
-        return JsonResponse({'message': 'not valid'}, status = status.HTTP_400_BAD_REQUEST )
+            register_serializer.save()
+            return JsonResponse(register_serializer.data, status = status.HTTP_201_CREATED )
+        else:
+            return JsonResponse({'message': register_serializer.errors}, status = status.HTTP_400_BAD_REQUEST )
 
 
+#로그인
+class LoginAPIView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializers = LoginSerializer(data=request.data)
+        print('####Post')
+
+        if serializers.is_valid():
+            return JsonResponse( serializers.data, status = status.HTTP_200_OK )
+        else:
+            JsonResponse({'message': serializers.errors}, status = status.HTTP_400_BAD_REQUEST )
+
+
+
+   
+      
 
 
 
