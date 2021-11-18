@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'administrator.apps.AdministratorConfig',
-    'widget_tweaks',
+    # 'widget_tweaks',
 
     #인증관련
+    # 'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'rest_auth',
 ]
@@ -121,7 +122,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework.permissions.IsAuthenticated'
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        
     ),
 }
 
@@ -160,7 +162,28 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': None,
 }
-REST_USE_JWT = True
+
+#Token발급 시 JWT기본으로 사용하게 하는 것
+# REST_USE_JWT = True
+
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_UNIQUE_EMAIL = True
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+#     'ROTATE_REFRESH_TOKENS': False,
+#     'BLACKLIST_AFTER_ROTATION': True,
+# }
+
+
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 

@@ -8,7 +8,9 @@ from django.contrib.auth import authenticate
 #이 두개는 뭐지 특히 api_settings??
 from django.contrib.auth.models import update_last_login
 from rest_framework_jwt.settings import api_settings
+from rest_framework.fields import CurrentUserDefault
 
+import jwt
 # class CreateUserSerializer(serializers.ModelSerializer):
 #     password1 = serializers.CharField(max_length=100, write_only=True)
 #     password2 = serializers.CharField(max_length=100, write_only=True)
@@ -58,8 +60,8 @@ class LoginSerializer(serializers.Serializer):
 
     def validate(self, data):
         print("#########loginserializer####")
-        username = data.get('username')
-        password = data.get('password')
+        username = data.get('username', None)
+        password = data.get('password', None)
 
         user = authenticate(username=username, password=password)
 
@@ -67,26 +69,56 @@ class LoginSerializer(serializers.Serializer):
             return {'username': 'None'}
         
         else:
-            # (user)(payload)왜 하는거지?
             payload = JWT_PAYLOAD_HANDLER(user)
             jwt_token = JWT_ENCODE_HANDLER(payload)
+            print('####jwt_token###',jwt_token)
             # receiver which updates the last_login date for
             update_last_login(None, user)
             
-        return {
-            'username' :  user.username,
-            'token' :  jwt_token
-        }
+            return {
+                'username' :  user.username,
+                'token' :  jwt_token
+            }
 
 
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ('id', 'name', 'email','phone')
+        # fields = '__all__'
+        # read_only_fields = ('id',)
+    
+    def create(self, validated_data):
+        validated_data['teacher'] = self.context['teacher']
+        return Student.objects.create(**validated_data)
 
-class PostPointSerailizer(serializers.ModelSerializer):
+
+class PointSerailizer(serializers.ModelSerializer):
+    # number = serializers.IntegerField(source = 'get_number_display', required=True)
+
     class Meta:
         model = Point
         fields = '__all__'
 
+    # def create(self, validated_data):
+    #     validated_data['number'] = self.context['number']
+    #     return Point.objects.create(**validated_data)
 
-class StudentPointSerailizer(serializers.ModelSerializer):
+# student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #상품 소유자, 구매자
+# name = models.CharField(max_length=20, null=False) #상품이름
+# real_name =  models.CharField(max_length=100, null=False) 
+# price = models.IntegerField( null=False ) #필요포인트
+
+class ItemSerailizer(serializers.ModelSerializer):
     class Meta:
-        model = Student
-        fields = ('name','point')
+        model = Item
+        write_only_fileds = ('student')
+
+    def create(self, validated_data):
+        pass
+
+
+# class StudentPointSerailizer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Student
+#         fields = ('name','point')

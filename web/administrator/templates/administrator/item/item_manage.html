@@ -13,7 +13,7 @@
 {% endblock script %} 
 
 {% block subject %}
-    <h3>상품 관리 리스트sss</h3>
+    <h3>상품 관리 리스트</h3>
     <h1>Product management</h1>
 {% endblock subject %}
     
@@ -31,42 +31,23 @@
 
 
 {% block data %}
+    
 <form action="" method="POST" enctype="multipart/form-data" id='form1'>
     {% csrf_token %}
+    {% for item in item_list %}
     <tr>
-        <td>Automatic watering</td>
+        <td>{{ item.count }}</td>
         <td>
-            Now : {{item1_price}} <br>
+            Now : {{ item.price }} <br>
             New <input type="text" size='4' name='item1_price' style="margin:5px;">
         </td>
         <td>
             Now : 3 / {{ item1.count }}<br>
             New <input type="text" size='4' name='item1_count'>
         </td>
-        <td rowspan='3'><input type="submit" role="button" value="수정"></td>
+        <td><input type="submit" role="button" value="수정"></td>
     </tr>
-    <tr>
-        <td>Automatic ventilation motor operation<br>[ 자동 환기모터 작동 ]</td>
-        <td>
-            Now : {{item2_price}}<br>
-            New <input type="text" size='4' name='item2_price'>
-        </td>
-        <td>
-            Now : 3 / {{ item2.count }}<br>
-            New <input type="text" size='4' name='item2_count'>
-        </td>
-    </tr>
-    <tr>
-        <td>Automatic mood light operation<br>[ 자동 무드등 동작 ]</td>
-        <td>
-            Now :{{item3_price}}<br>
-            New <input type="text" size='4' name='item3_price'>
-        </td>
-        <td>
-            Now : 3 / {{ item3.count }}<br>
-            New <input type="text" size='4' name='item3_count'>
-        </td>
-    </tr> 
+    {% endfor %}
 </form>
 
 {% endblock data %}

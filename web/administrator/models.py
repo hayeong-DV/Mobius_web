@@ -3,12 +3,13 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 # Create your models here.
 
+
 class Student(models.Model):
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     name = models.CharField(max_length=10, null=True)
     email = models.EmailField(max_length=100, null = True)
     phone = models.CharField(max_length=20, null=True)
-    point =  models.IntegerField( null=True, blank=True)
+    point =  models.IntegerField( default=0, null=True, blank=True)
     point_used = models.IntegerField(default=0, blank=True, null=True)
 
     def __str__(self): 
@@ -39,12 +40,13 @@ class Observe(models.Model):
 
     
 #선생님이 item들 가지고 있다가 student에게 나중에 주는거 하고싶은데
-#그럼 어떻게 해야하지 - null을 그냥 선생님으로 나타내게 하여라! -근데 여기서 request.user어케하지
+#그럼 어떻게 해야하지 - null을 그냥 선생님으로 나타내게 하여라! -근데 여기서 request.user어케하지 - 못함
 class Item(models.Model):
-    # blank=''면 선생님인걸로
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #상품 소유자, 구매자
+    # blank=''면 선생님인걸로 - 근데 그럼 선생님마다 의 아이템이 안생기는거 아닌가???
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) #관리자
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #소유자, 구매자
     name = models.CharField(max_length=20, null=False) #상품이름
-    real_name =  models.CharField(max_length=100, null=False) 
+    real_name =  models.CharField(max_length=70, null=False) 
     price = models.IntegerField( null=False ) #필요포인트
 
     def __str__(self): 
@@ -52,17 +54,18 @@ class Item(models.Model):
 
 
 
-    # def check_item_type(self):
-    #     print('###')
-    #     print(Item.objects.exclude(name__contains = 'save').values('name').distnct())
-
- 
+CHOICE = (
+# (db에 저장되는 값, admin이나 폼에서 표시하는 값)
+    ( '1', '1일 1회'),
+    ( '2', '1일 2회'),
+    ( '3', '1일 3회'),
+)
 
 class Point(models.Model):
-    name = models.CharField(max_length=20, null=False) # 포인트 지급 이름?
-    action = models.CharField(max_length=100) #포인트 행동조건
+    name = models.CharField(max_length=20, null=False) # 포인트 이름?
+    action = models.CharField(max_length=100, null=False) #포인트 행동조건
     payment = models.IntegerField( null=False ) # 지급 포인트
-    number= models.CharField(max_length=100) #포인트 지급 횟수
+    number= models.CharField(max_length=10, choices=CHOICE, null=False, default = '1' ) #지급 횟수 조건???
 
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)

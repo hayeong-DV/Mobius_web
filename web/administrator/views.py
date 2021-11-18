@@ -1,10 +1,11 @@
-from django.shortcuts import render
 from django.urls.base import reverse
 from django.views.generic import(
     ListView, DetailView, TemplateView,
     CreateView, UpdateView, DeleteView
 )
 from django.contrib.auth import authenticate, login
+# from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 
 from .forms import StudentForm, ResgisterForm
 from .serializers import *
@@ -13,6 +14,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
@@ -298,16 +300,16 @@ class PointView(LoginRequiredMixin, ListView):
         return redirect('administrator:point_list')
 
 
-def get_data(context):  
-    for item in ['item1','item2','item3']:
-        if Item.objects.filter(name=item, student__name ='teacher'):
-            context[item] = Item.objects.filter(name= item, student__name ='teacher')
-            context['{}_price'.format(item)] = context[item][0].price
-        else:
-            context['{}_save'.format(item)] = Item.objects.get(name='{}_save'.format(item))
-            context['{}_price'.format(item)] = context['{}_save'.format(item)].price
+# def get_data(context):  
+#     for item in ['item1','item2','item3']:
+#         if Item.objects.filter(name=item, student__name ='teacher'):
+#             context[item] = Item.objects.filter(name= item, student__name ='teacher')
+#             context['{}_price'.format(item)] = context[item][0].price
+#         else:
+#             context['{}_save'.format(item)] = Item.objects.get(name='{}_save'.format(item))
+#             context['{}_price'.format(item)] = context['{}_save'.format(item)].price
         
-    return context
+#     return context
 
 
 
@@ -589,80 +591,190 @@ class StudentLogView(LoginRequiredMixin, ListView):
                 print(response_access.text)
 
         return redirect('administrator:student-log')
+  
+  
+  
+def check_item_type(self):
+    teacher_items = Item.objects.filter(teacher = self.request.user)
+    items = teacher_items.values_list('name', flat = True)
 
+    #아이템 종류 리스트
+    item_list = {}
+    item_type_list = items.distinct()
 
-class ItemUpdateView(LoginRequiredMixin, DetailView):
+    for item in item_type_list:
+        items = teacher_items.filter(name = item)
+        item_list[item] = ( items,  items.count())
+
+    print(item_list)
+
+    #아이템 종류별 갯수
+    #이거 람다로는 안되나??
+    # for item in item_type_list:
+    #     item_count[item] = teacher_items.filter(name = item).count()
+    
+  
+    return item_list
+
+class ItemManageView(LoginRequiredMixin, DetailView):
     #상품 관리 [O]
     login_url = 'login/'
-    template_name = 'administrator/item/item.html'
-    # model = Student
-    model = Student
+    model = User
     fields=['name','price']
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        print('####')
-        print(self.object)
-       
+        item_list = check_item_type(self)
+
         context = self.get_context_data() 
-        context = get_data(context)
-        return self.render_to_response(context) 
+        context['item_list'] = item_list
+       
+        print(context)
+       
+        #?pk안보내도 되네?????/
+        return render(request, 'administrator/item/item_manage.html', context)
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()      
-        #새 포인트 가격 저장, 수량 만큼 객체 생성,삭제
+
+    # def post(self, request, *args, **kwargs):
+    #     self.object = self.get_object()      
+    # #     #새 포인트 가격 저장, 수량 만큼 객체 생성,삭제
+    # #     #post된 것들 가져오기
+    #     item_type = check_item_type(self)
         
-        #post된 것들 가져오기
+    #     if item_type != []:
+    #         for item in item_type:
+    #             get_item = Item.objects.filter(teacher = request.user, name = item)
+
+
+    #     else:
+            
         
+        # for item in item_type:
+            #존재하는 item들(item_type) price랑 종류별 갯수 가져오기    
+            
 
-        for item in ['item1', 'item2','item3']:
-            data = {
-                'price' : self.request.POST.get('{}_price'.format(item), ''),
-            }
-            count = self.request.POST.get('{}_count'.format(item), '')
+
+        
+        # for item in ['item1', 'item2','item3']:
+        #     data = {
+        #         'price' : self.request.POST.get('{}_price'.format(item), ''),
+        #     }
+        #     count = self.request.POST.get('{}_count'.format(item), '')
             
             
-            if data['price'] != '':
-                # price = data['price']
-                Item.objects.filter(name= item).update(**data)
-                Item.objects.filter(name= '{}_save'.format(item)).update(**data)
+        #     if data['price'] != '':
+        #         # price = data['price']
+        #         Item.objects.filter(name= item).update(**data)
+        #         Item.objects.filter(name= '{}_save'.format(item)).update(**data)
             
-            if count != '':
-                old = Item.objects.filter(name=item, student__name = 'teacher').count()
-                new = int(count)
+        #     if count != '':
+        #         old = Item.objects.filter(name=item, student__name = 'teacher').count()
+        #         new = int(count)
 
-                print('old: ',old, 'new: ', new)
+        #         print('old: ',old, 'new: ', new)
 
-                if new > old or old == 0 :
-                    for i in range(new - old):
-                        Item.objects.create(
-                            student = self.object,
-                            name = item,
-                            price = Item.objects.get(name='{}_save'.format(item)).price,
-                            real_name = Item.objects.get(name='{}_save'.format(item)).real_name
-                        )
-                elif new < old:
-                    for i in range(old - new):
-                        last_obj = Item.objects.filter(name=item).last().delete()
+        #         if new > old or old == 0 :
+        #             for i in range(new - old):
+        #                 Item.objects.create(
+        #                     student = self.object,
+        #                     name = item,
+        #                     price = Item.objects.get(name='{}_save'.format(item)).price,
+        #                     real_name = Item.objects.get(name='{}_save'.format(item)).real_name
+        #                 )
+        #         elif new < old:
+        #             for i in range(old - new):
+        #                 last_obj = Item.objects.filter(name=item).last().delete()
 
                         
-        return redirect('administrator:home')
+        # return redirect('administrator:home')
 
 
 #_________________________________________________________________________________________________
 
+class StudentListAPIView(APIView):
+    #관리자별 학생리스트
+    permission_classes = [IsAuthenticated]
 
-# class PointAPIView(APIView):
-#     #포인트 항목 API
-#     queryset = Point.objects.exclude(student__name = 'teacher')
-#     # queryset = Point.objects.all()
+    def get(self, request, format=None):
+        # print('##get')
+        queryset = request.user.student_set.all()
+        student_list = StudentSerializer(queryset, many = True)
+        return JsonResponse(student_list.data, status = status.HTTP_200_OK, safe=False)
+       
+    def post(self, request, format=None):
+        # print('##post')
+        add_serializer = StudentSerializer(data = request.data, context={'teacher':request.user})
+        if add_serializer.is_valid():
+            add_serializer.save()
+            return JsonResponse(add_serializer.data, status = status.HTTP_201_CREATED, safe=False)
+        return JsonResponse({'message': 'create error'}, status = status.HTTP_400_BAD_REQUEST)
+
+
+class StudentDetailAPIView(APIView):
+    #관리자별 학생 수정
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return Student.objects.get(pk=pk)
+        except:
+            return {'message': 'no pk'}
+
+    def get(self, request, pk, format = None):
+        # print('####get')
+        obj= self.get_object(pk)
+        get_students = StudentSerializer(obj)
+        return JsonResponse(get_students.data, status = status.HTTP_200_OK)
+
+    def put(self, request, pk, format = None):
+        # print('####put')
+        obj= self.get_object(pk)
+        put_serial = StudentSerializer(obj, request.data)
+        if put_serial.is_valid():
+            put_serial.save()
+            return JsonResponse(put_serial.data, status = status.HTTP_200_OK)
+        return JsonResponse(put_serial.errors, status = status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format = None):
+        obj= self.get_object(pk)
+        obj.delete()
+        return JsonResponse({'message':'success delete'}, status = status.HTTP_204_NO_CONTENT)
+
+
+class PointAPIView(APIView):
+    #포인트 항목 API
+    permission_classes = [IsAuthenticated]
+    queryset = Point.objects.all()
+
+    def post(self, request, format = None):
+        point_serial = PointSerailizer(request.data)
+        print(request.data['number'])
+        if point_serial.is_valid():
+            print('####')
+            point_serial.save()
+            return JsonResponse(point_serial.data, status = status.HTTP_201_CREATED)
+        else:
+            return JsonResponse(point_serial.errors, status = status.HTTP_400_BAD_REQUEST)
     
-#     def post(self, request, *args, **kwargs):
-#         print(self.queryset)
-#         #queryset은 dict가 아니라서 safe=False필요 
-#         #safe> 변환할 데이터가 dict인지 확인하는거
-#         send_content = PostPointSerailizer(self.queryset, many=True)
-#         return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
+    def get(self, format = None):
+        queryset = Point.objects.all()
+        print(queryset)
+        #queryset은 dict가 아니라서 safe=False필요 
+        #safe> 변환할 데이터가 dict인지 확인하는거
+        send_content = PointSerailizer(queryset, many=True)
+        return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
+
+    #put, delete나중에
+        
+
+class MarketAPIView(APIView):
+    #장터
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, format = None):
+        pass
+
+
 
     
 # class StudentLogAPIView(APIView):
@@ -672,5 +784,4 @@ class ItemUpdateView(LoginRequiredMixin, DetailView):
 #         pass
 #         send_content = StudentPointSerailizer(self.queryset, many=True)
 #         return JsonResponse(send_content.data, status = status.HTTP_200_OK, safe=False)
-
 

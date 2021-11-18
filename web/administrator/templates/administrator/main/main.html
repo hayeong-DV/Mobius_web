@@ -48,10 +48,10 @@
                         <a href="{% url 'administrator:requirement' %}" class='link_a'>Requirements</a>
                     </li>
                     <li class='link_li'>
-                        <a href="{% url 'administrator:student-log' %}" class='link_a'>Student point</a>
+                        <a href="{% url 'administrator:student_log' %}" class='link_a'>Student point</a>
                     </li>
                     <li class='link_li'>
-                        <a href="{% url 'administrator:item-update' 2 %} " class='link_a'>Product management</a>
+                        <a href="{% url 'administrator:item_manage' request.user.id %} " class='link_a'>Product management</a>
                     </li>
                 </ul>
              </div>
