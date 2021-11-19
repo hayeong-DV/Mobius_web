@@ -76,7 +76,9 @@ urlpatterns=[
     
   
     #상품 관리
-    path('item-update/<int:pk>', views.ItemManageView.as_view(), name='item_manage'),
+    path('item-mange/<int:pk>', views.ItemManageView.as_view(), name='item_manage'),
+    path('item-mange/<int:pk>/item-create', views.ItemCreateView.as_view(), name='item_create'),
+    path('item-mange/<int:pk>/item-update/<int:item_pk>', views.ItemUpdateView.as_view(), name='item_update'),
     # path('api/item-update/', views.ItemManageView.as_view(), name='item-update'),
 
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

@@ -20,16 +20,29 @@ class ResgisterForm(UserCreationForm):
         return user
 
 
-
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
         fields = '__all__'
         exclude = ('teacher',)
-        
-            
-             
 
+
+class ItemForm(forms.ModelForm):  
+    class Meta:
+        model = Item
+        fields = (  'teacher',
+                    'student',
+                    'name',
+                    'price',
+                )
+    
+
+             
+# teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) #관리자
+# student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #소유자, 구매자
+# name = models.CharField(max_length=20, null=False) #상품이름
+# real_name =  models.CharField(max_length=70, null=False) 
+# price = models.IntegerField( null=False ) #필요포인트
 
 
 

@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login
 # from django.shortcuts import render, render_to_response
 from django.shortcuts import render
 
-from .forms import StudentForm, ResgisterForm
+from .forms import *
 from .serializers import *
 
 from rest_framework.views import APIView
@@ -173,6 +173,7 @@ class ObserveLogView(LoginRequiredMixin, ListView):
     model = Student
 
     def get(self, request, *args, **kwargs):
+        #학생 없을 경우도 추가
         self.object = self.get_queryset()
         self.object_list = self.object
         
@@ -599,22 +600,16 @@ def check_item_type(self):
     items = teacher_items.values_list('name', flat = True)
 
     #아이템 종류 리스트
-    item_list = {}
+    # item_count = 
     item_type_list = items.distinct()
+    item_list = {}
 
     for item in item_type_list:
-        items = teacher_items.filter(name = item)
-        item_list[item] = ( items,  items.count())
+        filter_item = teacher_items.filter(name = item)
+        item_list[item] = filter_item, filter_item.count()
 
-    print(item_list)
-
-    #아이템 종류별 갯수
-    #이거 람다로는 안되나??
-    # for item in item_type_list:
-    #     item_count[item] = teacher_items.filter(name = item).count()
-    
-  
     return item_list
+
 
 class ItemManageView(LoginRequiredMixin, DetailView):
     #상품 관리 [O]
@@ -628,17 +623,20 @@ class ItemManageView(LoginRequiredMixin, DetailView):
 
         context = self.get_context_data() 
         context['item_list'] = item_list
-       
-        print(context)
-       
+    
         #?pk안보내도 되네?????/
-        return render(request, 'administrator/item/item_manage.html', context)
+        return render(request, 'administrator/item/item_manage.html', context )
 
 
     # def post(self, request, *args, **kwargs):
-    #     self.object = self.get_object()      
-    # #     #새 포인트 가격 저장, 수량 만큼 객체 생성,삭제
-    # #     #post된 것들 가져오기
+    #     #create new item
+    #     print('####post')
+    #     self.object = self.get_object()
+
+
+        
+    #     #새 포인트 가격 저장, 수량 만큼 객체 생성,삭제
+    #     #post된 것들 가져오기
     #     item_type = check_item_type(self)
         
     #     if item_type != []:
@@ -687,6 +685,57 @@ class ItemManageView(LoginRequiredMixin, DetailView):
 
                         
         # return redirect('administrator:home')
+
+class ItemCreateView(LoginRequiredMixin, CreateView):
+    #아이템 생성 []
+    login_url = 'login/'
+
+    model = User
+    form_class = ItemForm
+    template_name =  'administrator/item/item_create.html'
+    success_url = reverse_lazy('administrator:home')
+
+    def form_valid(self, form):
+        if not Item.objects.filter(name= form.cleaned_data['name']).exists():
+        # 'WSGIRequest' object has no attribute 'data' 이거 뭐여 request.data치면 이럼     
+        #     print(self.request.POST['quantity'])
+
+            self.object = form.save(commit=False)
+            self.object.teacher = self.request.user
+            self.object.save()
+ 
+            return render(self.request, 'administrator/item/item_manage.html')
+        else:
+            messages.error(self.request, '이미 존재하는 아이템입니다', extra_tags='danger')
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class ItemUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = 'login/'
+    model = User
+    form_class = ItemForm
+    template_name =  'administrator/item/item_update.html'
+
+    def get_object(self, *args, **kwargs):
+        return Item.objects.get(pk=self.kwargs['item_pk'])
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+      
+        context = self.get_context_data()
+        context['count'] = Item.objects.filter(teacher=request.user, name=self.object.name ).count()
+        
+        print(self.get_form())
+        return self.render_to_response(self.get_context_data(form=self.get_form()))
+        
+        
+
+
+
+
+    
+
+
 
 
 #_________________________________________________________________________________________________

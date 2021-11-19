@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block title %}
-    <title>상품 관리 페이지</title>
+    <title>아이템 관리 페이지</title>
     <link rel="stylesheet" href="{% static 'All.css' %}" />
 {% endblock title %}
 
@@ -13,7 +13,7 @@
 {% endblock script %} 
 
 {% block subject %}
-    <h3>상품 관리 리스트</h3>
+    <h3>아이템 관리 리스트</h3>
     <h1>Product management</h1>
 {% endblock subject %}
     
@@ -30,22 +30,27 @@
 {% endblock table %}
 
 
+{%block content %}
+<button id = "post_button" type="submit" 
+    name="create_item"><a href="{% url 'administrator:item_create' request.user.id %}">Create new item</a></button><br/>
+{% endblock content %}
+
+
 {% block data %}
-    
 <form action="" method="POST" enctype="multipart/form-data" id='form1'>
     {% csrf_token %}
-    {% for item in item_list %}
+    {% for item, value in item_list.items %}
     <tr>
-        <td>{{ item.count }}</td>
+        <td> {{ value.0.first.name }} </td>
         <td>
-            Now : {{ item.price }} <br>
-            New <input type="text" size='4' name='item1_price' style="margin:5px;">
+            Now : {{ value.0.first.price}}<br>
+            {% comment %} New <input type="text" size='4' name='item1_price' style="margin:5px;"> {% endcomment %}
         </td>
         <td>
-            Now : 3 / {{ item1.count }}<br>
-            New <input type="text" size='4' name='item1_count'>
+            Now : {{ value.1 }}<br>
+            {% comment %} New <input type="text" size='4' name='item1_count'> {% endcomment %}
         </td>
-        <td><input type="submit" role="button" value="수정"></td>
+        <td><button type="submit"><a href="{% url 'administrator:item_update' request.user.pk value.0.first.pk %}">수정</a></button></td>
     </tr>
     {% endfor %}
 </form>

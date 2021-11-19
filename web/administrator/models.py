@@ -45,8 +45,8 @@ class Item(models.Model):
     # blank=''면 선생님인걸로 - 근데 그럼 선생님마다 의 아이템이 안생기는거 아닌가???
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) #관리자
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #소유자, 구매자
-    name = models.CharField(max_length=20, null=False) #상품이름
-    real_name =  models.CharField(max_length=70, null=False) 
+    name = models.CharField(max_length=70, null=False) #상품이름
+    # real_name =  models.CharField(max_length=70, null=False) 
     price = models.IntegerField( null=False ) #필요포인트
 
     def __str__(self): 
