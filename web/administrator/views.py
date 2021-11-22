@@ -34,6 +34,7 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 from django.core.files.base import ContentFile
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 
 
 get_headers = {
@@ -693,7 +694,10 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
     model = User
     form_class = ItemForm
     template_name =  'administrator/item/item_create.html'
-    success_url = reverse_lazy('administrator:home')
+    
+    def get_success_url(self):
+        return reverse_lazy('administrator:item_manage', kwargs={'pk': self.kwargs['pk']})
+
 
     def form_valid(self, form):
         if not Item.objects.filter(name= form.cleaned_data['name']).exists():
@@ -704,30 +708,62 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
             self.object.teacher = self.request.user
             self.object.save()
  
-            return render(self.request, 'administrator/item/item_manage.html')
+            return super().form_valid(form)
         else:
             messages.error(self.request, '이미 존재하는 아이템입니다', extra_tags='danger')
             return self.render_to_response(self.get_context_data(form=form))
 
 
 class ItemUpdateView(LoginRequiredMixin, UpdateView):
+    #아이템 수량, 포인트 가격 업데이트 
     login_url = 'login/'
     model = User
     form_class = ItemForm
     template_name =  'administrator/item/item_update.html'
+    success_url = None
 
     def get_object(self, *args, **kwargs):
         return Item.objects.get(pk=self.kwargs['item_pk'])
 
     def get(self, request, *args, **kwargs):
+        print('#####get@@#@@@')
         self.object = self.get_object()
-      
+
         context = self.get_context_data()
         context['count'] = Item.objects.filter(teacher=request.user, name=self.object.name ).count()
+        return self.render_to_response(context)
         
-        print(self.get_form())
-        return self.render_to_response(self.get_context_data(form=self.get_form()))
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        price = int(request.POST['price'])
+        count = int(request.POST['count'])
+
+        items = Item.objects.filter(teacher = request.user, name = self.object.name)   
+        print('#####')
+
+        if count > items.count():
+            Item.objects.create(
+                teacher =  self.request.user,
+                name = self.object.name,
+                price = self.object.price
+            )    
+        elif count < items.count():
+            num = items.count() - count
+            result = [items.last().delete() for i in range(num)]
+
+        items.update(price = price)
+        print('#####2')
+
+        #위엔 문제 없는 듯
+        #리턴하면  '__proxy__' object has no attribute 'get'  뜸
+        return HttpResponseRedirect(reverse_lazy('administrator:item_manage', kwargs={'pk': self.kwargs['pk']}) )
         
+
+
+        
+
+
+   
         
 
 
@@ -745,7 +781,7 @@ class StudentListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        # print('##get')
+        print('##get')
         queryset = request.user.student_set.all()
         student_list = StudentSerializer(queryset, many = True)
         return JsonResponse(student_list.data, status = status.HTTP_200_OK, safe=False)

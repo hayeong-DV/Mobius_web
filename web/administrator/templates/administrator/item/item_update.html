@@ -33,7 +33,7 @@
 <form action="" method="POST" enctype="multipart/form-data" id='form1'>
     {% csrf_token %}
 
-    <button id = "post_button" type="submit" name="create">Create</button><br/>
+    <button id = "post_button" type="submit" name="update">Update</button><br/>
     
     <tr>
         <td>price</td>
@@ -42,7 +42,7 @@
     </tr>
     <tr>
         <td>count</td>
-        <td>{{count}}</td>
+        <td>{{ count }}</td>
         <td><input name='count'></td>
     </tr>
 </form>
