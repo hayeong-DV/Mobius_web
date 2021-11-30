@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # 'widget_tweaks',
 
     #인증관련
+    'rest_framework',
     # 'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'rest_auth',

@@ -14,53 +14,33 @@
 
 
 {% block subject %}
-    <h3>상품 구매 현황</h3>
-    <h1>Product purchase log</h1>
+<h3>상품 구매 현황</h3>
+<h1>Product purchase log</h1>
 {% endblock subject %}
     
 {% block top %}
     <img id="topImg" src="{%static 'purchase/basket.png' %}"/>
 {% endblock top %} 
-
    
 {% block table %}
-<th>Product Name</th>
-<th>Point</th>
-<th>Quantity</th>
-<th>User</th>
+    <th>Product Name</th>
+    <th>Quantity</th>
+    <th>User</th>
 {% endblock table %}
 
 {% block data %}
+
+{% for name, item_value in item_list.items %}
 <tr>
-    <td>Automatic watering<br>[ 자동 물 주기 ]</td>
-    <td>{{item1_price}}</td>
-    
-    <td>3 / {{item1_count}}</td>
-   
+    <td>{{name}}</td>
+    <td>{{item_value.count}}</td>
     <td>
-        {% for object in item1 %}
-        <li>{{ object.student.name }}</li>
+        {% for object in item_value.item %}
+            <li>{{ object.student.name }}</li>
         {% endfor %}
     </td>
 </tr>
-<tr>
-    <td>Automatic ventilation motor operation<br>[ 자동 환기모터 작동 ]</td>
-    <td>{{item2_price}}</td>
-    <td>3 / {{item2_count}}</td>
-    <td>
-        {% for object in item2 %}
-        <li>{{ object.student.name }}</li>
-        {% endfor %}
-    </td>
-</tr>
-<tr>
-    <td>Automatic mood light operation<br>[ 자동 무드등 동작 ]</td>
-    <td>{{item3_price}}</td>
-    <td>3 / {{item3_count}}</td>
-    <td>
-        {% for object in item3 %}
-        <li>{{ object.student.name }}</li>
-        {% endfor %}
-    </td>
-</tr>
+{% endfor%}
+
+
 {% endblock data %}

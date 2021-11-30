@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.urls import reverse
+from django.utils.text import slugify
+
 # Create your models here.
 
 
@@ -34,7 +37,6 @@ class Observe(models.Model):
     water = models.IntegerField( null=True, blank=True)
     receive_date = models.CharField(max_length=100, null=False)
 
-
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.student)
 
@@ -48,27 +50,42 @@ class Item(models.Model):
     name = models.CharField(max_length=70, null=False) #상품이름
     # real_name =  models.CharField(max_length=70, null=False) 
     price = models.IntegerField( null=False ) #필요포인트
+    slug = models.SlugField(allow_unicode=True)
 
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)
 
+    def save(self, *args, **kwargs):
+        # allow_unicode에 True 값을 줘야 한국어로 작성을 할수있다
+        self.slug = slugify(self.name, allow_unicode=True)
+        super().save(*args, **kwargs)
+
+    # def get_absolute_url(self):
+    #     return reverse("administrator:item_update", kwargs={"slug": self.slug})
+    
+
 
 
 CHOICE = (
-# (db에 저장되는 값, admin이나 폼에서 표시하는 값)
     ( '1', '1일 1회'),
     ( '2', '1일 2회'),
     ( '3', '1일 3회'),
 )
 
 class Point(models.Model):
-    name = models.CharField(max_length=20, null=False) # 포인트 이름?
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) #관리자
     action = models.CharField(max_length=100, null=False) #포인트 행동조건
     payment = models.IntegerField( null=False ) # 지급 포인트
     number= models.CharField(max_length=10, choices=CHOICE, null=False, default = '1' ) #지급 횟수 조건???
+    slug = models.SlugField(allow_unicode=True, unique=True)
 
     def __str__(self): 
-        return '[{}] {}'.format(self.id, self.name)
+        return '[{}] {}'.format(self.id, self.action)
+
+    def save(self, *args, **kwargs):
+        # allow_unicode에 True 값을 줘야 한국어로 작성을 할수있다
+        self.slug = slugify(self.action, allow_unicode=True)
+        super().save(*args, **kwargs)
 
 
 class Requirements(models.Model):

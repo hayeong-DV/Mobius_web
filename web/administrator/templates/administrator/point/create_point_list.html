@@ -1,0 +1,68 @@
+<!-- 학생들 현재 보유 포인트, 지금까지 사용한 포인트 확인 -->
+{% extends 'administrator/observation/student.html' %}
+{% load static %}
+
+{% block title %}
+    <title>포인트 생성 페이지</title>
+    <link rel="stylesheet" href="{% static 'All.css' %}" />
+{% endblock title %}
+
+{% block script %}
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
+    <!-- <script type="text/javascript" src="point.js"> </script>   -->
+{% endblock script %} 
+
+{% block subject %}
+    <h3>전체 포인트 리스트</h3>
+    <h1>Point list all</h1>
+{% endblock subject %}
+    
+
+{% block top %}
+    <img id="topImg" src="{%static 'main/growth.png' %}"/>
+{% endblock top %}
+   
+{% block table %}
+    <th>name</th>
+    <th>input</th>
+{% endblock table %}
+
+
+{% comment %} {%block content %}
+<button id = "post_button" type="submit" 
+    name="create_item" onclick="{% url 'administrator:item_create' %}">Create new item</button><br/>
+{% endblock content %} {% endcomment %}
+
+
+{% block data %}
+<form action="" method="POST" enctype="multipart/form-data" id='form1'>
+    {% csrf_token %}
+
+    <button id = "post_button" type="submit" name="create">Create</button><br/>
+    
+    <tr>
+        <td>ACTION</td>
+        <td>{{form.action}}</td>
+    </tr>
+    <tr>
+        <td>POINT</td>
+        <td>{{form.payment}}</td>
+    </tr>
+     <tr>
+        <td>NUM</td>
+        <td>{{form.number}}</td>
+    </tr>
+   
+    <tr>
+        <td colspan=2> 
+            {% if messages %}
+                {% for message in messages %}
+                    {{ message.message }}
+                {% endfor %}
+            {% endif %}
+        </td>
+    </tr>
+</form>
+
+{% endblock data %}
+

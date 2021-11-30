@@ -36,8 +36,11 @@ class ItemForm(forms.ModelForm):
                     'price',
                 )
     
+class PointForm(forms.ModelForm):
+    class Meta:
+        model = Point
+        fields = '__all__'
 
-             
 # teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) #관리자
 # student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #소유자, 구매자
 # name = models.CharField(max_length=20, null=False) #상품이름

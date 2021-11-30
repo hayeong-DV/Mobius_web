@@ -30,32 +30,30 @@
     <form action="" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <input id = "post_button" role="button" type="submit" name="submit" value="Submit point list"/><br/>
+        <button id = "post_button"><a href="{% url 'administrator:add_point_list' request.user.pk %}">포인트목록 생성</a></button>
     </form>
+    
    
 
    <table class="table">
         <thead>
              <tr>
-                <th >NAME</th>
                 <th >Action</th>
                 <th >Get Point</th>
                 <th >Condition</th>
+                <th>Update</th>
             </tr>
             {% for object in object_list %} 
             <tr>
-                <td>{{ object.name }}</td>
                 <td>{{ object.action }}</td>
                 <td>{{ object.payment }}</td>
                 <td>{{ object.number }}</td>
+                {% comment %} <td><button type="submit"><a href="{% url 'administrator:item_update' request.user.pk item_value.slug_name %}">수정</a></button></td> {% endcomment %}
             </tr>
             {% endfor %}
             <tbody id="myTable"> </tbody>
         </thead>
     </table>
-
-    <!-- <script type="text/javascript" src="point.js"> </script>   -->
-   
-  
 </body>
 
 

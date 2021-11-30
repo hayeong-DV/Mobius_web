@@ -76,6 +76,7 @@ class LoginSerializer(serializers.Serializer):
             update_last_login(None, user)
             
             return {
+                'id' : user.id,
                 'username' :  user.username,
                 'token' :  jwt_token
             }
@@ -95,30 +96,48 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class PointSerailizer(serializers.ModelSerializer):
     # number = serializers.IntegerField(source = 'get_number_display', required=True)
-
     class Meta:
         model = Point
         fields = '__all__'
 
-    # def create(self, validated_data):
-    #     validated_data['number'] = self.context['number']
-    #     return Point.objects.create(**validated_data)
+# def update_item_count(self, items, count, price):
 
-# student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #상품 소유자, 구매자
-# name = models.CharField(max_length=20, null=False) #상품이름
-# real_name =  models.CharField(max_length=100, null=False) 
-# price = models.IntegerField( null=False ) #필요포인트
+
 
 class ItemSerailizer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        write_only_fileds = ('student')
+        fields = ('id','name','price','student')
 
     def create(self, validated_data):
-        pass
+        print('##create##')
+        validated_data['teacher'] = self.context['teacher']
+        return Item.objects.create(**validated_data)
 
 
-# class StudentPointSerailizer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Student
-#         fields = ('name','point')
+class StudentPointSerailizer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ('name','point','point_used')
+
+
+class ObserveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Observe
+        fields = '__all__'
+
+    # def update(self, instance, validated_data):
+    #     # instance.name = validated_data.get('name', instance.name)
+    #     print(instance)
+    #     print(validated_data)
+    #     return instance
+    # def create(self, validated_data):
+    #     print('###create')
+    #     return Observe.objects.create(**validated_data)
+
+
+
+
+
+
+  

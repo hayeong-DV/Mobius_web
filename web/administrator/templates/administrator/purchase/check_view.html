@@ -24,54 +24,23 @@
    
 {% block table %}
     <th>Product Name</th>
-    <th>Point</th>
     <th>Quantity</th>
     <th>User</th>
 {% endblock table %}
 
 {% block data %}
+{% for name, item_value in item_list.items %}
 
 <tr>
-    <td>Automatic watering<br>[ 자동 물 주기 ]</td>
-    <td>{{item1_price}}</td>
-    <td>3 / {{item1_count}}</td>
+    <td>{{name}}</td>
+    <td>{{item_value.count}}</td>
     <td>
-        {% for object in item1 %}
-        {% if not item1_count %}
-            <li>None</li>
-        {% else %}
+        {% for object in item_value.item %}
             <li>{{ object.student.name }}</li>
-        {% endif %}
-        {% endfor %}
+        {% endfor %} 
     </td>
 </tr>
+{% endfor%}
 
-<tr>
-    <td>Automatic ventilation motor operation<br>[ 자동 환기모터 작동 ]</td>
-    <td>{{item2_price}}</td>
-    <td>3 / {{item2_count}}</td>
-    <td>
-        {% for object in item2 %}
-        {% if not item2_count %}
-        <li>None</li>
-        {% else %}
-            <li>{{ object.student.name }}</li>
-        {% endif %}
-        {% endfor %}
-    </td>
-</tr>
-<tr>
-    <td>Automatic mood light operation<br>[ 자동 무드등 동작 ]</td>
-    <td>{{item3_price}}</td>
-    <td>3 / {{item3_count}}</td>
-    <td>
-        {% for object in item3 %}
-        {% if not item2_count %}
-        <li>None</li>
-        {% else %}
-            <li>{{ object.student.name }}</li>
-        {% endif %}
-        {% endfor %}
-    </td>
-</tr> 
+
 {% endblock data %}

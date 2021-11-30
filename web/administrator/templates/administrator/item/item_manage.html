@@ -39,18 +39,18 @@
 {% block data %}
 <form action="" method="POST" enctype="multipart/form-data" id='form1'>
     {% csrf_token %}
-    {% for item, value in item_list.items %}
+    {% for name, item_value in item_list.items %}
     <tr>
-        <td> {{ value.0.first.name }} </td>
+        <td> {{ name }} </td>
         <td>
-            Now : {{ value.0.first.price}}<br>
+            Now : {{ item_value.price}}<br>
             {% comment %} New <input type="text" size='4' name='item1_price' style="margin:5px;"> {% endcomment %}
         </td>
         <td>
-            Now : {{ value.1 }}<br>
+            Now : {{ item_value.count}}<br>
             {% comment %} New <input type="text" size='4' name='item1_count'> {% endcomment %}
         </td>
-        <td><button type="submit"><a href="{% url 'administrator:item_update' request.user.pk value.0.first.pk %}">수정</a></button></td>
+        <td><button type="submit"><a href="{% url 'administrator:item_update' request.user.pk item_value.slug_name %}">수정</a></button></td>
     </tr>
     {% endfor %}
 </form>

@@ -37,30 +37,23 @@
 
     <div class="list con">
         <ul class="row">
-            <li class="cell">
-                <div class="img-box"><img src="{%static 'market/watering.png' %}" alt=""></div>
-                <div class="product-name">Automatic watering
-                    <br><br>[ count: {{item1.count}} ]</div>
-                <div class="product-price">{{item1_price}}</div>
-            </li>
-            <li class="cell">
-                <div class="img-box"><img src=".{%static 'market/cooler.png' %}" alt=""></div>
-                <div class="product-name">Automatic ventilation motor operation
-                    <br> [ count: {{item2.count}} ] </div>
-                <div class="product-price">{{item2_price}}</div>
-                
-            </li>
-            <li class="cell">
-                <div class="img-box"><img src="{%static 'market/light.png' %}" alt=""></div>
-                <div class="product-name"> Automatic mood light operation
-                    <br> [ count: {{item3.count}} ] </div>
-                <div class="product-price">{{item3_price}}</div>
-            </li>
+        {% comment %} 반복할 부분 {% endcomment %}
+        {% for name, item_value in item_list.items %}
+        <li class="cell">
+            <div class="img-box"><img src="{%static 'item/box.png' %}" alt=""></div>
+            <div class="product-name">
+                {{name}}<br><br>
+                [ count: {{item_value.price}} ]
+            <div>
+            <div class="product-price">
+                {{item_value.count}}
+            </div>  
+        </li>
+        {% endfor%}
+        {% comment %} 반복할 부분 {% endcomment %}
         </ul>
-  
+    </div>
 </body>
-
-
 </html>
 
 
