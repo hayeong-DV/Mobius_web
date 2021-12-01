@@ -50,7 +50,7 @@
             Now : {{ item_value.count}}<br>
             {% comment %} New <input type="text" size='4' name='item1_count'> {% endcomment %}
         </td>
-        <td><button type="submit"><a href="{% url 'administrator:item_update' request.user.pk item_value.slug_name %}">수정</a></button></td>
+        <td><button type="submit"><a href="{% url 'administrator:item_update' request.user.pk item_value.item_name %}">수정</a></button></td>
     </tr>
     {% endfor %}
 </form>

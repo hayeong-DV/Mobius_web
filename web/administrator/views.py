@@ -24,7 +24,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.contrib import messages
 from administrator.models import *
-from datetime import date
+from datetime import date, timedelta
 import requests
 import json
 import base64
@@ -483,6 +483,7 @@ class PurchaseView(LoginRequiredMixin, ListView):
                     update_item = coupon[item].first()
 
                     update_item.student = student = Student.objects.get(name = buy_user) 
+                    update_item.date = date.today.strftime("%YYYY-%MM-%DD")
                     update_item.save()
                     student.point -= int(use_point)
                     student.point_used += int(use_point)
@@ -534,7 +535,6 @@ class PurchaseView(LoginRequiredMixin, ListView):
                 "item" : item_list[item][0],
                 "price" : item_list[item][0][0].price, 
                 "count" : item_list[item][1],
-            #   "slug_name" : item_list[item][0][0].slug
             }
         # print(get_result)
         context['item_list'] = get_result
@@ -560,7 +560,6 @@ class CheckPurchaseView(ListView):
                 "item" : item_list[item][0],
                 "price" : item_list[item][0][0].price, 
                 "count" : item_list[item][1],
-            #   "slug_name" : item_list[item][0][0].slug
             }
         # print(get_result)
         context['item_list'] = get_result
@@ -628,7 +627,7 @@ class ItemManageView(LoginRequiredMixin, DetailView):
             get_result[item] = {
               "price" : item_list[item][0][0].price, 
               "count" : item_list[item][1],
-              "slug_name" : item_list[item][0][0].slug
+              "item_name" : item_list[item][0][0].name
             }
         # print(get_result)
         context['item_list'] = get_result
@@ -689,7 +688,7 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
     success_url = None
 
     def get_queryset(self):
-        return Item.objects.filter(slug=self.kwargs['slug'])
+        return Item.objects.filter(name=self.kwargs['item'])
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_queryset().first()
@@ -732,14 +731,53 @@ class ChartView(LoginRequiredMixin, ListView):
     #     return Item.objects.filter(teacher = self.request.user)
 
     def get(self, request, *args, **kwargs):
+        items = Item.objects.filter(teacher = request.user).exclude(student=None)
+        from_date = request.GET.get('from_date', None)
+        to_date = request.GET.get('to_date', None)
+
+        today = date.today()
+        if from_date == None or to_date == None:
+            filter_items = items.filter(date__range = [today-timedelta(weeks=1),today])
+        else:
+            filter_items = items.filter(date__range = [from_date, to_date])
+
         self.object_list = self.get_queryset()
         context = self.get_context_data()
 
-        items = Item.objects.filter(teacher = request.user).exclude(student=None)
         buy_list = {}
-        for item in items:
-            buy_list[item.name] = items.filter(name=item.name).count()
+        day = []
+        for i, item in enumerate(list(set(map(lambda x: x.name, filter_items)))):
+    
+            result_item = filter_items.filter(name = item)
+            resutl_item_date = list(map(lambda x:x.date, result_item))
+            buy_list[item] = {
+                "count" : result_item.count(),
+                "date" : resutl_item_date,
+                # 날짜별 item갯수
+                # "count_by_date": [ 
+                #         result_item.filter(date = day).count() for day in resutl_item_date
+                #     ] 
+            }  
+            #count_by_date = [day, item1, item2 .. ] 
+    
+        #동일한 날짜에 아이템 종류별 갯수 뽑아야함- 어떻게????
+        count_by_date = []
+        for item in buy_list:
+            for day in buy_list[item]["date"]:
+                print(day)
+                count_by_date.append([day.day,  )
+                
+
         
+
+
+        
+
+            
+
+        
+
+        print(buy_list)
         context['item_list'] = buy_list
         return self.render_to_response(context)
 
@@ -863,7 +901,7 @@ class ItemUpdateAPIView(APIView):
     #         return {'message': 'no pk'}
 
     def get_queryset(self):
-        return Item.objects.filter(slug=self.kwargs['slug'])
+        return Item.objects.filter(name=self.kwargs['item'])
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()

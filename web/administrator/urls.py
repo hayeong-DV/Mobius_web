@@ -80,10 +80,10 @@ urlpatterns=[
     #상품 관리 [O][O]
     path('item-mange/<int:pk>', views.ItemManageView.as_view(), name='item_manage'),
     path('item-mange/<int:pk>/item-create', views.ItemCreateView.as_view(), name='item_create'),
-    path('item-mange/<int:pk>/item-update/<str:slug>', views.ItemUpdateView.as_view(), name='item_update'),
+    path('item-mange/<int:pk>/item-update/<str:item>', views.ItemUpdateView.as_view(), name='item_update'),
     
     path('api/item-mange/<int:pk>', views.ItemManageAPIView.as_view(), name='api_item_manage'),
-    path('api/item-mange/<int:pk>/item-update/<str:slug>', views.ItemUpdateAPIView.as_view(), name='api_item_update'),
+    path('api/item-mange/<int:pk>/item-update/<str:item>', views.ItemUpdateAPIView.as_view(), name='api_item_update'),
 
     path('chart', views.ChartView.as_view(), name='chart_practice')
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

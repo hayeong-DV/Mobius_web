@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.text import slugify
+from datetime import date
 
 # Create your models here.
 
@@ -48,24 +49,32 @@ class Item(models.Model):
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True) #관리자
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True) #소유자, 구매자
     name = models.CharField(max_length=70, null=False) #상품이름
-    # real_name =  models.CharField(max_length=70, null=False) 
     price = models.IntegerField( null=False ) #필요포인트
-    slug = models.SlugField(allow_unicode=True)
+    date = models.DateField(null=True, blank=True)
 
     def __str__(self): 
         return '[{}] {}'.format(self.id, self.name)
 
-    def save(self, *args, **kwargs):
-        # allow_unicode에 True 값을 줘야 한국어로 작성을 할수있다
-        self.slug = slugify(self.name, allow_unicode=True)
-        super().save(*args, **kwargs)
+
+
+
+
+
+
+
+    # def save(self, *args, **kwargs):
+    #     print(date.today)
+    #     if self.student != None:
+    #         self.date  = date.today
+    #     super().save(*args, **kwargs)
+
+    #     # allow_unicode에 True 값을 줘야 한국어로 작성을 할수있다
+    #     self.slug = slugify(self.name, allow_unicode=True)
+    #     super().save(*args, **kwargs)
 
     # def get_absolute_url(self):
     #     return reverse("administrator:item_update", kwargs={"slug": self.slug})
     
-
-
-
 CHOICE = (
     ( '1', '1일 1회'),
     ( '2', '1일 2회'),
