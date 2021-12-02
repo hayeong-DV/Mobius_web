@@ -29,6 +29,7 @@ import requests
 import json
 import base64
 import datetime
+import pandas as pd 
 
 from PIL import Image
 from io import BytesIO
@@ -732,53 +733,63 @@ class ChartView(LoginRequiredMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         items = Item.objects.filter(teacher = request.user).exclude(student=None)
+
         from_date = request.GET.get('from_date', None)
         to_date = request.GET.get('to_date', None)
 
         today = date.today()
+        print(from_date, to_date)
+
+        #그냥 get일때
         if from_date == None or to_date == None:
-            filter_items = items.filter(date__range = [today-timedelta(weeks=1),today])
-        else:
-            filter_items = items.filter(date__range = [from_date, to_date])
+            from_date = today-timedelta(weeks=1)
+            to_date = today
+    
+        filter_items = items.filter(date__range = [from_date, to_date])
 
         self.object_list = self.get_queryset()
         context = self.get_context_data()
 
-        buy_list = {}
-        day = []
-        for i, item in enumerate(list(set(map(lambda x: x.name, filter_items)))):
-    
-            result_item = filter_items.filter(name = item)
-            resutl_item_date = list(map(lambda x:x.date, result_item))
-            buy_list[item] = {
-                "count" : result_item.count(),
-                "date" : resutl_item_date,
-                # 날짜별 item갯수
-                # "count_by_date": [ 
-                #         result_item.filter(date = day).count() for day in resutl_item_date
-                #     ] 
-            }  
-            #count_by_date = [day, item1, item2 .. ] 
-    
-        #동일한 날짜에 아이템 종류별 갯수 뽑아야함- 어떻게????
-        count_by_date = []
-        for item in buy_list:
-            for day in buy_list[item]["date"]:
-                print(day)
-                count_by_date.append([day.day,  )
-                
-
         
+        all_count = {}
+        dates = pd.date_range(start=from_date, end=to_date).to_pydatetime().tolist()
+        item_names = set(filter_items.values_list("name", flat=True))
 
-
-        
-
+        tmp_dict = {str(key):{} for key in item_names}
+        for item in filter_items.values("date", "name"):
+            item_date = str(item['date'])
+            if not item_date in tmp_dict[item['name']]:
+                tmp_dict[item['name']][item_date] = filter_items.filter(
+                                                        name = item['name'],  
+                                                        teacher = request.user,
+                                                        date = item_date
+                                                        ).count()
+            else:
+                tmp_dict[item['name']][item_date] += 0
             
+            all_count[item['name']] = {
+                "count" : filter_items.filter( name = item['name'], teacher = request.user,).count()
+            }
+      
+        res_list = []
+        for cur_date in dates:
+            cur_date = str(cur_date.date())
+            cur_arr = [cur_date]+ [0]*len(item_names)
 
-        
+            for ind, item_name in enumerate(item_names):
+                if cur_date in tmp_dict[item_name]:
+                    cur_arr[ind+1] += tmp_dict[item_name][cur_date]  
+            res_list.append(cur_arr)
+       
+        if request.is_ajax():
+            result = {
+                "item": list(all_count.keys()),
+                "item_list" : res_list
+            }
+            return JsonResponse(result)
 
-        print(buy_list)
-        context['item_list'] = buy_list
+        context['item_list'] = res_list
+        context['all_count'] = all_count
         return self.render_to_response(context)
 
         
@@ -1196,6 +1207,8 @@ class CheckPurchaseAPIView(APIView):
         
 
       
+
+
 
 
 

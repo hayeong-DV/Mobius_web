@@ -36,15 +36,14 @@
     
     /*파이차트*/
     function drawChart1() {
-            {% for item, value in item_list.items %}
+            {% for item, value in all_count.items %}
                 console.log(['{{item}}', Number('{{value}}')])
-
             {% endfor %}
         
         /*데이터셋팅*/
         var data1 = google.visualization.arrayToDataTable([
             ['name', 'item_count'],
-            {% for item, value in item_list.items %}
+            {% for item, value in all_count.items %}
                 ['{{item}}', Number('{{value.count}}')],
             {% endfor %}
         ]);
@@ -56,45 +55,37 @@
 
         /* 차트 그리기 */
         var chart1 = new google.visualization.PieChart(document.getElementById('piechart'));
-
         chart1.draw(data1, options1);
     } 
 
 
-
-
-
     /*라인차트*/
-    function drawChart2() {
+    function drawChart2(item_type, item_list) {
         var data2 = new google.visualization.DataTable();
-        data2.addColumn('number', 'Day');
+        data2.addColumn('string', 'Day');
+       
+        if(item_type){
+            console.log(item_type)
+            for ( var i = 0; i < item_type.length; i++) {
+                data2.addColumn('number', item_type[i]);
+            }
+            
+            for ( var i = 0; i < item_type.length; i++) {
+                data2.addRows(item_type[i]);
+            }
+            
+        }
+        else{
+            {% for item_name in all_count.keys %}
+                data2.addColumn('number', '{{item_name}}');
+            {% endfor %}
 
-        {% for item_name in item_list.keys %}
-            data2.addColumn('number', '{{item_name}}');
-            console.log('##')
-        {% endfor %}
-
-        data2.addRows([
-            /*{% for item in item_list.keys %}
-               
-
-            {% endfor %}*/
-
-            [2,  30.9, 20],
-            [3,  25, 20],
-            /*
-            [4,  11.7, 18.8],
-            [5,  11.9, 17.6],
-            [6,   8.8, 13.6],
-            [7,   7.6, 12.3],
-            [8,  12.3, 29.2],
-            [9,  16.9, 42.9, 14.8],
-            [10, 12.8, 30.9, 11.6],
-            [11,  5.3,  7.9,  4.7],
-            [12,  6.6,  8.4,  5.2],
-            [13,  4.8,  6.3,  3.6],
-            [14,  4.2,  6.2,  3.4]*/
-        ]);
+            data2.addRows([
+            {% for item in item_list %}
+                    {{item | safe}},
+            {% endfor %}
+            ]);
+        }
 
         var options2 = {
             chart: {
@@ -112,18 +103,11 @@
 
 
 
-
-
-
-
-
-
-
     $("#StartDate").datepicker({
         showOn: "both",
         changeMonth:true,
         changeYear:true,
-        minDate:'-100y',
+        dateFormat: 'yy-mm-dd',
         showButtonPanel: true,
         showMonthAfterYear: true ,
         dayNamesMin: ['월', '화', '수', '목', '금', '토', '일'],
@@ -135,33 +119,35 @@
         showOn: "both",
         changeMonth:true,
         changeYear:true,
-        minDate:'-100y',
-        dateFormat: 'YYYY-MM-DD',
+       
+        dateFormat: 'yy-mm-dd',
         showButtonPanel: true,
         showMonthAfterYear: true ,
         dayNamesMin: ['월', '화', '수', '목', '금', '토', '일'],
         onClose: function( selectedDate ){
-            $("#EndDate").datepicker("option", "maxDate", selectedDate );
+            $("#StartDate").datepicker("option", "maxDate", selectedDate )
         }
     });
 
     $("#filter").click(function(){
         var from_date = $("#StartDate").val()
         var to_date = $('#EndDate').val();  
-        console.log(from_date, to_date)
 
-        if(from_date != '' && to_date != '')  
+        if(from_date != '' &&  to_date != '')  
         {
             $.ajax({
                 /*url: 'administrator:chart_practice',*/
                 url : "{% url 'administrator:chart_practice' %}",
                 method: "GET",
                 data : {"from_date": from_date, "to_date": to_date},
-                success:function(data)
-                {
-                    console.log('success')
-
+                success: function(result){
+                    if (result != null ){
+                        console.log(result['item'])
+                        console.log(result['item_list'])
+                        drawChart2(result['item'], result['item_list']);
+                    }
                 }
+                
             });
         }
     });
